@@ -12,7 +12,7 @@ CDMs original which may make tbsm not yet a replacement of CDM for you:
 - And maybe something else removed which I forgot to mention
 
 so you are warned.
-But it is getting worse: This very first version is not very well tested! 
+But it is getting worse: This very first version is not very well tested!
 
 Anyway have fun,
 Lothar
