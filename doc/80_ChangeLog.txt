@@ -1,0 +1,18 @@
+2016-01-19  v0.1  [YANKED]
+=======================================
+
+          Hello World!
+
+Aside from all bling-bling there are some things to note about removed code from
+CDMs original which may make tbsm not yet a replacement of CDM for you:
+
+- There is no search for next empty VT
+- There is no check if X is already running somewhere
+- There is no SPAWN set or checked
+- And maybe something else removed which I forgot to mention
+
+so you are warned.
+But it is getting worse: This very first version is not very well tested! 
+
+Anyway have fun,
+Lothar

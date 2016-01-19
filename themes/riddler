@@ -1,0 +1,11 @@
+# Name: Riddler
+# Author: loh.tar
+# Description: From Gotham with love
+
+tbsmColor="${colGreen}"
+menuPrompt="  ?"
+quickPrompt="  ?"
+#quickPrompt="  ? ${myName}:"
+noSeparator="true"
+noMenuHeader="true"
+verboseLevel="1"

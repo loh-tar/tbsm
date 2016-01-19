@@ -1,0 +1,6 @@
+# Name: Gently
+# Author: loh.tar
+# Description: Unobtrusive and reticent but not austere
+
+noSeparator="true"
+verboseLevel=1

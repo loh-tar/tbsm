@@ -1,0 +1,8 @@
+# Name: Austere
+# Author: loh.tar
+# Description: Anything but fun
+
+noSeparator="true"
+tbsmColor=${txtClean}
+quickPrompt="Choose:"
+verboseLevel=1

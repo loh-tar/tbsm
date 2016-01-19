@@ -1,0 +1,33 @@
+Priority
+==========
+H: high
+M: medium
+L: low
+
+The priority of things to do are quite arbitrary chosen and may not guaranty
+that things are done in this order not even that they ever be done.
+
+You are kindly invited to take one of these points to start your contribution.
+But you could of cause chose any other, not here listed, issue if you like.
+
+H: Avoid to start two sessions (yes, not applications) at a time on the same VT.
+   It is funny, in some ways, but should be catched. Sadly have only the
+   plasma.desktop file an entry with "Type=XSession" all other (sorry, the two
+   I have seen) says "Type=Application"
+H: Think about how to add Xserver arguments individual per session/application.
+   Adding a key to the .desktop file would work
+H: Add support to give arguments to an application by the run command
+M: Read and display also the description out of .desktop files with respect to
+   the local language
+M: Add a variable for indent list items. Now there are two spaces fixed, or even
+   better, a mask to fill by printf with number and name
+L: Add support for command history by readline
+L: Add command 'edit' to open theme and .desktop files in users preferred
+   editor. To do so copy the theme file, if needed, from system config to user
+   config directory. To edit a .desktop file create a new one, if needed, in the
+   whitelist directory by grepping only the used keys out of the original file
+L: Add command '-' to remove an entry from current list. One keystroke less than
+   -b or -w and you have not to mention what are you currently see
+L: Add command '+' if '-' is implemented to be coherent
+L: Add command 'list themes' and display author/name/description
+L: Add individual menu seperators top/middle/bottom and show them individual

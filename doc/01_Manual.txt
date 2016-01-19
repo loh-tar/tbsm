@@ -1,0 +1,95 @@
+                                                             tbsm v0.1, Jan 2016
+Index
+=======
+1- Introduction
+2- Things Of Interest
+3- Post Install Tasks
+4- Thanks To
+5- Copying
+
+
+1- Introduction
+=================
+tbsm is an application or session launcher, written in pure bash with no
+ncurses or dialog dependencies. He is inspired by cdm, tdm, in some way by
+krunner and related.
+
+To became an overview of available options run:
+  tbsm help
+
+It was attempted to design the behavior of tbsm to be as less pesky as possible,
+and to start daily tasks with as less key strokes.
+
+To do so, tbsm saves the last run session and a default session. These both are
+available by the quick menu where you can start the default session by simply
+hit <enter> or the last session when you delete the bang ! previous. You can run
+there any command tbsm knows without to remove the bang.
+
+You reach the quick menu from the full session menu by hitting <enter> on an
+empty prompt. To go back you have to give the needed command which is 'm'.
+
+You should know that there is not really any special at the 'full session menu'.
+It is only a pimped out listing of your tbsm configuration where as the commands
+'search' and 'list' show a poor list. In any way you can use the listed index
+numbers as argument for any command you like.
+
+May you have a nice day, I run now 'q'
+
+
+2- Things Of Interest
+=======================
+He only works with .desktop files to start something, there is no other config
+possible.
+
+When running tbsm without any argument he is scanning for available .desktop
+files in /usr/share/xsessions/ and $configDir/whitelist but skip any file
+referenced in $configDir/blacklist. Whereas $configDir is ~/.config/tbsm.
+
+When searching for any pattern he run a grep with the pattern on all .desktop
+files in /usr/share/applications/
+
+The first session ever started became the default session.
+
+
+3- Post Install Tasks
+=======================
+To auto start tbsm after login edit your ~/.bash_profile, or similar, and append
+to the end something like:
+
+  # Auto start tbsm after login on first two VTs
+  [[ $XDG_VTNR -le 2 ]] && tbsm
+
+NOTE: Ensure you start no other display manager
+
+
+3-1- Customizing
+------------------
+Take a look at /etc/xdg/tbsm/tbsm.conf and subfolders.
+Create your own theme files in ~/.config/tbsm/themes.
+
+
+4- Thanks To
+==============
+All contributors of cdm and tdm,
+stackexchange.com, bash-hackers.org, google.com and many more.
+Last but not least: Mom & Dad and archlinux.org
+
+
+5- Copying
+============
+Copyright (C) 2016 loh.tar@googlemail.com
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+MA 02110-1301, USA.

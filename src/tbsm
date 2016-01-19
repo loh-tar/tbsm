@@ -1,0 +1,860 @@
+#!/bin/bash
+#
+#   tbsm: Terminal Based Session Manager
+#
+#   Copyright (C) 2016 loh.tar@googlemail.com
+#
+#   Thanks to:
+#     CDM: The Console Display Manager
+#     Copyright (C) 2009-2012, Daniel J Griffiths <dgriffiths@ghost1227.com>
+#     Essential parts of tbsm are based on CDMs code.
+#
+#     t-display-manager
+#     Copyright (C) 2012, 2013 Iru Cai <mytbk920423@gmail.com>
+#     Taken the idea of linking to files to collect a setup
+#
+#     All contributors of cdm and tdm,
+#     stackexchange.com, bash-hackers.org, google.com and many more.
+#     Last but not least: Mom & Dad and archlinux.org
+#
+#   This program is free software; you can redistribute it and/or modify
+#   it under the terms of the GNU General Public License as published by
+#   the Free Software Foundation; either version 2 of the License, or
+#   (at your option) any later version.
+#
+#   This program is distributed in the hope that it will be useful,
+#   but WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#   GNU General Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License
+#   along with this program; if not, write to the Free Software
+#   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+#   MA 02110-1301, USA.
+
+# TODO
+#   Consider http://wiki.bash-hackers.org/howto/collapsing_functions
+
+declare -r myName="tbsm"
+declare -r myLongName="Terminal Based Session Manager"
+declare -r myVersion="0.1" # Jan 2016
+declare -r myDescribtion="A pure bash session or application launcher. Inspired by cdm, tdm and krunner."
+declare -r systemConfigDir="/etc/xdg/${myName}"
+declare -r configDir="${HOME}/.config/${myName}"
+declare -r installPfad=""
+declare    protectedVerbose
+declare    lastSession
+declare -i lastSessionIndex
+declare    defaultSession
+declare -i defaultSessionIndex
+declare -a binList=()             # fooList filled with keys out of .desktop files
+declare -a nameList=()            #
+declare -a flagList=()
+declare -a linkList=()
+declare -a blacklist=()
+declare -a argList=("$@")         # haha!
+declare    command                # Used by popCommand. tbsm own command to execute
+declare    argument               # Used by popArgument
+declare -a cmdStack=()            # Stack of tbsm own commands
+declare    verboseLevel="2"       # 0=quiet, 1=silent=only errors, 2=infos, 3=verbose=warnings
+declare    XserverArg="-nolisten tcp"
+
+# More about colors at Arch Wiki
+# https://wiki.archlinux.org/index.php/Color_Bash_Prompt
+#
+# Don't use double quotes here!
+# Text attributes
+declare -r txtClean=$'\e[0m'      # All attributes off
+declare -r txtBold=$'\e[1m'       # Or bright, depend on your terminal
+declare -r txtUScore=$'\e[4m'     # Underscore
+declare -r txtBlink=$'\e[5m'
+declare -r txtRVideo=$'\e[7m'     # Reverse video
+declare -r txtHide=$'\e[8m'       # Concealed, very useful here...
+declare -r txtWipe=$'\ec'         # Clear the screen
+
+# Foreground colors only. Someone sicko may miss backgroud colors
+declare -r colBlack=$'\e[30m'
+declare -r colRed=$'\e[31m'
+declare -r colGreen=$'\e[32m'
+declare -r colYello=$'\e[33m'
+declare -r colBlue=$'\e[34m'
+declare -r colMagenta=$'\e[35m'
+declare -r colArchBlue=$'\e[36m'  # Well, someone may call it Cyan
+declare -r colWhite=$'\e[37m'
+# Other theme related variables see near end of file, search for 'default theme'
+
+pushCommand() {
+  command="${1}"
+  [[ -z "${command}" ]] && return
+
+  shift
+
+  cmdStack=("${cmdStack[@]}" "$@");
+  cmdStack=("${cmdStack[@]}" "${command}");
+# # #   echo "push cmd: $command"
+}
+
+popCommand() {
+  # Return codes are:
+  #   0 You have data
+  #   1 No more data
+
+  local last=(${#cmdStack[@]}-1)
+
+  command=""
+
+  [[ "${last}" -lt 0 ]] && return 1
+
+  command="${cmdStack[${last}]}";
+  cmdStack=(${cmdStack[@]:0:last})
+# # #   echo "poped: $command"
+}
+
+popArgument() {
+  # Return codes are:
+  #   0 You have data
+  #   1 No more data
+
+  # We could use popCommand here and test if there is "quit" but then we have to
+  # to re-push it. That's why we code all again
+
+  local last=(${#cmdStack[@]}-1)
+
+  argument=""
+
+  [[ "${last}" -lt 0 ]] && return 1
+  [[ "${cmdStack[${last}]}" == "quit" ]] && return 1
+
+  argument="${cmdStack[${last}]}";
+  cmdStack=(${cmdStack[@]:0:last})
+# # #   echo "popedArg: $argument"
+}
+
+popListIndex() {
+  # Return codes are:
+  #   0 You have data
+  #   1 No more data
+  #   2 Bad data
+
+  popArgument || return 1
+
+  [[ "${#linkList[@]}" -eq "0" ]] && fillLists
+
+  if [[ ! ("${argument}" =~ ^[1-9]+[0-9]*$) ]]; then
+    # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
+    error "${FUNCNAME[-2]:3}: Not my kind of number: ${argument}"
+    return 2
+  elif [[ "$argument" -gt "${#linkList[@]}" ]]; then
+    error "${FUNCNAME[-2]:3}: Selection number too big: ${argument}"
+    return 2
+  fi
+
+  listIndex=$((argument-1))
+}
+
+# http://stackoverflow.com/a/229606
+hasOption() { [[ "${argList[@]}" == *"--$1"* ]]; }
+
+# It's better not to use echo
+# http://unix.stackexchange.com/a/65819
+print() { [[ ${verboseLevel} -gt "0" ]] && printf "%s\n" "$*"; }
+info()  { [[ ${verboseLevel} -gt "1" ]] && print "${infoPrefix} $*" >&2 ; }
+warn()  { [[ ${verboseLevel} -gt "2" ]] && (print "${warnPrefix} $*") >&2 ; }
+error() { (print "${errorPrefix} $*") >&2 ; }
+exitNormal() { [[ -n "$1" ]] && print "$*"; exit 0; }
+exitError()  { error "$*"; exit 1; }
+exitCancel() { error "$*"; exit 2; }
+
+checkConfigDir() {
+  [[ -d "${configDir}" ]] && return
+
+  mkdir -p "${configDir}"/{blacklist,themes,whitelist}
+  info "Created config directory: ${configDir}"
+}
+
+readConfigFile() {
+  local    cfgFile="${1:-${myName}.conf}"
+  local -a searchPath=("${systemConfigDir}" "${configDir}" "$PWD")
+  local -a failPath=()
+  local -i ok=0
+
+  for path in ${searchPath[@]}; do
+    local fullPath="${path}/${cfgFile}"
+    if [[ ! -r "${fullPath}" ]]; then
+      failPath=("${failPath[@]}" "${fullPath}")
+      continue;
+    fi
+    ok=1
+
+    # http://stackoverflow.com/a/20815951
+    while IFS='= ' read lhs rhs
+    do
+      if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
+        rhs="${rhs%%\#*}"             # Del in line right comments
+        rhs="${rhs%"${rhs##*[^ ]}"}"  # Del trailing spaces
+
+        # Without eval does it not works as intended. Because we want use
+        # already known variables in config files too.
+        declare -g $lhs="$(eval "echo $rhs")"
+      fi
+    done < "${fullPath}"
+
+  done
+
+  if (( !$ok )); then
+    warn "Config file not found: ${cfgFile##*/}"
+    warn "+-Searched in: ${failPath[0]%/*}/"
+    for path in ${failPath[@]:1}; do
+      warn "+------------: ${path%/*}/"
+    done
+    return 1
+  fi
+
+  [[ -n "${protectedVerbose}" ]] && verboseLevel=("${protectedVerbose}")
+}
+
+clearLists() {
+  binList=()
+  nameList=()
+  flagList=()
+  linkList=()
+  [[ "$1" != "keepBlack" ]] && blacklist=()
+}
+
+setDefaultAndLast() {
+  clearLists
+  readDesktopFiles "${configDir}"
+  defaultSession="${linkList[0]}"
+  lastSession="${linkList[1]}"
+}
+
+fillBlacklist() {
+  clearLists
+  readDesktopFiles "${configDir}/blacklist"
+  blacklist=("${linkList[@]}")
+}
+
+fillLists() {
+  setDefaultAndLast
+  fillBlacklist
+  clearLists "keepBlack"
+  readDesktopFiles "/usr/share/xsessions"
+  readDesktopFiles "${configDir}/whitelist"
+
+#   binList+=("-")
+#   nameList+=("Drop to Shell / Exit")
+#   flagList+=("-")
+#   linkList+=("-")
+}
+
+parseDesktopFiles() {
+  local execKey
+  local nameKey
+  local binItem
+  local realLink
+  local flag
+
+  #TODO: allow full quoting and expansion according to desktop entry spec:
+  # http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
+
+  for ((count=0; count < ${#desktopFiles[@]}; count++)); do
+    # Filter blacklisted entries
+    realLink=("$(readlink -m ${desktopFiles[${count}]})")
+    # http://stackoverflow.com/a/15394738
+    [[ "${blacklist[@]}" =~ "${realLink}" ]] && continue
+
+    # TryExec key is there to determine if executable is present,
+    # but as we are going to test the Exec key anyway, we ignore it.
+    # http://stackoverflow.com/a/22550813
+    execKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Exec=//p}' ${desktopFiles[${count}]})
+    nameKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Name=//p}' ${desktopFiles[${count}]})
+    flag=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Terminal=//p}' ${desktopFiles[${count}]})
+    if [[ "${flag}" == "true" ]]; then flag="C"; else flag="X"; fi
+    if [[ -n ${execKey} && -n ${nameKey} ]]; then
+      # The .desktop files allow there Exec keys to use $PATH lookup.
+      binItem="$(which $(cut -f 1 -d ' ' <<< ${execKey}))"
+      # If which fails to return valid path, skip to next .desktop file.
+      if [[ $? != 0 ]]; then continue; fi
+      binList+=("${binItem} $(cut -s -f 2- -d ' ' <<< ${execKey})")
+      flagList+=("${flag}")
+      nameList+=("${nameKey}")
+      linkList+=("${realLink}")
+    fi
+  done
+}
+
+readDesktopFiles() {
+  local    filePfad="$1"  # e.g. /usr/share/xsessions/
+  local -a desktopFiles
+
+  if [[ -d "${filePfad}" ]]; then
+    # Given -maxdepth 1 to fix trouble at storing default/lastSession
+    # links above blacklist/whitelist directorys
+    # Why use -regex and not -name ?
+    desktopFiles=($(find "${filePfad}" -maxdepth 1 -regex .\*.desktop | sort))
+    parseDesktopFiles
+  else
+    warn "${FUNCNAME[0]}: Pfad not found: ${filePfad}"
+  fi
+}
+
+cmdSearch() {
+  local    filePfad="/usr/share/applications"
+  local -a desktopFiles
+
+  if ! popArgument; then
+    error "${FUNCNAME[0]:3} needs a pattern"
+    return 1
+  fi
+  pattern="$argument"
+
+  clearLists
+
+  if [[ -d "${filePfad}" ]]; then
+    desktopFiles=($(grep -Ril --include="*.desktop" $pattern $filePfad | sort))
+    info "Found matches: ${#desktopFiles[@]}"
+    parseDesktopFiles
+  else
+    warn "${FUNCNAME[0]:3}: Pfad not found: ${filePfad}"
+  fi
+
+  print "Applications matching '$pattern'"
+  printMenuList
+}
+
+printMenuSeparator() {
+  if [[ ! "${noSeparator}" ]]; then
+    print "${colSeparator}${menuSeparator}${txtNormal}"
+  fi
+}
+
+printMenuHeader() {
+  # When called without argument set title to menuTitle
+  local title=${@:-${menuTitle}}
+
+  if [[ ! "${noMenuHeader}" ]]; then
+    printMenuSeparator
+    print "${title}"
+    printMenuSeparator
+  fi
+}
+
+printMenuFooter() { printMenuSeparator; }
+
+printMenuList() {
+  if [[ "${#nameList[@]}" == "0" ]]; then
+    print "  Nothing to list"
+    return
+  fi
+
+  for ((count = 0; count < ${#nameList[@]}; count++)); do
+    print "  $((count+1)) ${nameList[${count}]}";
+  done
+}
+
+runSession() {
+  local -i listIndex="$1"
+  local    bin=${binList[${listIndex}]}
+
+  [[ ${listIndex} -lt 0 ]] && error "Session number too small" && return 1
+  [[ ${listIndex} -gt ${#nameList[@]}-1 ]] && error "Session number too big" && return 1
+
+  info "Run session: ${nameList[listIndex]}"
+
+  # Run $bin according to its flag.
+  case ${flagList[${listIndex}]} in
+    # *C*onsole programs.
+    [Cc])
+#       # If $bin is a login shell, it might `exec' cdm again, causing an endless
+#       # loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
+#       # only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
+#       # See also the example shell profile file shipped with the cdm package.
+#
+#       # Also untrap SIGINT and SIGTSTP before spawning process: If this is not
+#       # done, any child process of any child (bash) shell will completely
+#       # ignore SIGINT, which is rather confusing, and cannot be undone.
+#
+#       trap - SIGINT SIGTSTP
+#       CDM_SPAWN=$$ exec "${bin[@]}"
+      info "Run command: exec ${bin[@]}"
+      exec ${bin[@]}
+      ;;
+    [Xx])
+#       # If X is already running and locktty=yes, activate it.
+#       if $(yesno locktty) && xdpyinfo -display ":$display.0" &> /dev/null; then
+#           chvt "$((display+xtty))"
+#           exitnormal
+#       fi
+#
+#       # Get the first empty display.
+#       display=0
+#       while ((display < 7)); do
+#           if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
+#                                                               # Display is in use by another user.
+#               [[ "$dpyinfo" == 'No protocol specified'* ]] ||
+#                                                               # Invalid MIT cookie.
+#               [[ "$dpyinfo" == 'Invalid MIT'* ]]
+#           then
+#               let display+=1
+#           else
+#               break
+#           fi
+#       done
+#
+#       # Support for running X in current tty.
+#       if [[ $xtty == 'keep' ]]; then
+#           vt="$(tty)"
+#           if [[ "$vt" != '/dev/tty'* ]]; then
+#               error 'invalid TTY.'
+#               exiterror
+#           fi
+#
+#           vt="${vt#/dev/tty}"
+#       fi
+#
+#       serverargs=(":${display}" "${serverargs[@]}" "vt$vt")
+#           if exec startx   -- "${serverargs[@]}" > "$startxlog" 2>&1
+#       then
+#           exitnormal
+#       else
+#           warn "\`cdm' exited unsuccessfully."
+#           exiterror
+#       fi
+
+      info "Run command: startx ${bin[@]}"
+      startx ${bin[@]} -- "${XserverArg[@]}"
+      ;;
+    -)
+      exitNormal "Have a nice day"
+      ;;
+    *)
+      exitError "Unknown flag: ${flagList[${listIndex}]}"
+      ;;
+  esac
+
+  # Exit or not. Show full menu if no command left
+  if popCommand
+    then pushCommand ${command}
+    else pushCommand "menu"
+  fi
+}
+
+showQuickMenu() {
+  setDefaultAndLast
+
+  if [[ -z "${defaultSession}" ]]; then
+    pushCommand "menu"
+    return
+  fi
+
+  local promptText
+  promptText="${promptCol}${quickPrompt}${txtNormal} [*]"
+  [[ -n "${defaultSession}" ]] && promptText=("${promptText}  [!]${nameList[0]}")
+  [[ -n "${lastSession}" && "${lastSession}" != "${defaultSession}" ]] && promptText=("${promptText} [ ]${nameList[1]}")
+
+  promptText="${promptText} "
+
+  read -er -i "!" -p "${promptText}" userInput;
+
+  if [[ "${userInput}" == "!" ]]; then runSession "0"
+  elif [[ -z "${userInput}" ]]; then runSession "1"
+  else
+    pushCommand "${userInput#!}"
+  fi
+}
+
+showMenu() {
+  printMenuHeader $1
+  printMenuList
+  printMenuFooter
+}
+
+addToList() {
+  local    list="$1"
+  local -i ok=0
+  local -i err=0
+
+  while :
+  do
+    popListIndex
+    case $? in
+      1) break; ;;           # No more left
+      2) err=1; continue; ;; # Error but we ignore it
+    esac
+
+    if [[ "${linkList[${listIndex}]}" == "-" ]]; then
+      info "Session can't ${list}ed: ${nameList[${listIndex}]}"
+      continue
+    fi
+
+    ln -sf "${linkList[${listIndex}]}" "${configDir}/${list}/"
+    info "Session ${list}ed: ${nameList[${listIndex}]}"
+    ok=1
+  done
+
+  if (( !$ok )) ; then
+    # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
+    error "${FUNCNAME[1]:3} need a valid session number"
+    return 1
+  fi
+}
+
+removeFromList() {
+  local    list="$1"
+  local    file
+  local    link
+  local -i ok=0
+  local -i err=0
+
+  # Ensure popListIndex works as desired
+  clearLists
+  readDesktopFiles "${configDir}/${list}"
+
+  while :
+  do
+    popListIndex
+    case $? in
+      1) break; ;;           # No more left
+      2) err=1; continue; ;; # Error but we ignore it
+    esac
+
+    for file in ${configDir}/${list}/* ; do
+      link=("$(readlink -m ${file})")
+      if [[ "${link}" == "${linkList[${listIndex}]}" ]] ; then
+        unlink "$file"
+        info "Session removed from ${list}: ${nameList[${listIndex}]}"
+      fi
+    done
+    ok=1
+
+  done
+
+  if (( !$ok || $err )) ; then
+    # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
+    error "${FUNCNAME[1]:3} needs a valid session number"
+    return 1
+  fi
+}
+
+cmdBlacklist() {
+  case "$1" in
+    add)    addToList "blacklist"; ;;
+    remove) removeFromList "blacklist"; ;;
+    *)      exitError "FATAL: Not handeld by cmdBlacklist $1"; ;;
+  esac
+}
+
+cmdDefault() {
+  popListIndex
+  case $? in
+    1) error "Command default needs a number"; return 1; ;;
+    2) return 1; ;;
+  esac
+
+  if [[ "${linkList[${listIndex}]}" == "-" ]]; then
+    info "Session can't saved as default: ${nameList[${listIndex}]}"
+    return
+  fi
+
+  ln -sf -T "${linkList[${listIndex}]}" "${configDir}/000-default-session.desktop"
+  info "New default session: ${nameList[${listIndex}]}"
+  sleep 1
+}
+
+cmdDoc() {
+  local doc
+  local docMatch
+  local docPath="/usr/share/doc/tbsm"
+
+  popArgument
+  docMatch=($(find "${docPath}" -not -type d -iname \*${argument}\* | sort))
+
+  if [[ ${#docMatch[@]} -gt 1 ]]; then
+    print "Available documentation:"
+    for doc in ${docMatch[@]} ; do
+      doc="${doc#*/??_}"
+      print "  ${doc%.*}"
+    done
+  elif [[ -z $docMatch ]]; then
+      print "No manual match '${argument}'"
+  else
+   less $docMatch
+  fi
+}
+
+cmdHelp() {
+  local tab=$'\t'
+  local ind="  " # indent
+
+  popArgument
+
+  if [[ "${argument}" != "short" ]]; then
+    print "This is ${myName} (v${myVersion}) - ${myDescribtion}"
+    print "Usage:"
+    print "${ind}${myName} [COMMAND [argument..]] [OPTION [argument..] ..]"
+    print
+    print "COMMANDs are:"
+  else
+    print "Available commands:"
+  fi
+    print "${ind}blacklist, b <n..>${tab}Add/remove entries on the Blacklist. Use -b to remove"
+    print "${ind}default, d <n>${tab}Save session as the default session"
+    print "${ind}doc [pattern]${tab}${tab}List or show documentation files"
+  if [[ "${argument}" != "short" ]]; then
+    print "${ind}help, h${tab}${tab}You read it now"
+  else
+    print "${ind}help, h${tab}${tab}You used '?' so try it for some more info"
+  fi
+    print "${ind}list, l [b|c|w]${tab}List entries. Current, config or black-/whitelist"
+    print "${ind}menu, m${tab}${tab}Show the full session menu"
+    print "${ind}quick-menu, qm${tab}Show the quick menu to select default or last session"
+    print "${ind}quit, q${tab}${tab}Hasta la vista, Baby!"
+    print "${ind}run, r <n>${tab}${tab}Run the given session number"
+    print "${ind}whitelist, w <n..>${tab}Add/remove entries on the Whitelist. Use -w to remove"
+    print "For your convenience there are some short hands: lb lc lw <n> ?"
+  if [[ "${argument}" != "short" ]]; then
+    print
+    print "OPTIONs are prefixed by a double hyphen, they are:"
+    print "${ind}info  ${tab}${tab}Give some feedback what is going on"
+    print "${ind}quiet ${tab}${tab}Shut up!"
+    print "${ind}silent${tab}${tab}Be reticent"
+    print "${ind}theme <name>${tab}${tab}Use given extra configuration file in <configDir>/theme/"
+    print "${ind}verbose${tab}${tab}Tell me more"
+    print
+    print "Examples:"
+    print "Run a session whose number you know"
+    print "${ind}${myName} run 3"
+    print "Run with main menu and give a comprehensive feed back"
+    print "${ind}${myName} --verbose"
+    print "Run with qick start menu"
+    print "${ind}${myName} quick-menu"
+    #       print "${ind}${myName}"
+    #       print "${ind}${tab}"
+  fi
+}
+
+cmdList() {
+  local title
+
+  popArgument
+  case "${argument}" in
+    b)
+      fillBlacklist
+      title="Black listed entries:"
+    ;;
+    c)
+      fillLists
+      title="Current configuration:"
+    ;;
+    w)
+      clearLists
+      readDesktopFiles "${configDir}/whitelist"
+      title="White listed entries:"
+    ;;
+    *)
+      if [[ "${#nameList[@]}" == "0" ]]; then
+        pushCommand "list" "c"
+        return
+      else
+        title="Currently loaded list:"
+      fi
+    ;;
+  esac
+
+  # No showMenu here, keep the theme away and list it simple
+  print "${title}"
+  printMenuList
+}
+
+cmdMenu() {
+  clearCommands
+  fillLists
+  showMenu
+}
+
+cmdQMenu() {
+  clearCommands
+  showQuickMenu
+}
+
+cmdRun() {
+  popListIndex
+  case $? in
+    1) error "Command run needs a number"; return 1; ;;
+    2) return 1; ;;
+  esac
+
+  # When user choose 'Drop to Shell' there is no .desktop file to link
+  if [[ "${linkList[${listIndex}]}" != "-" ]]; then
+    # Don't save default as last session
+    if [[ "${defaultSession}" !=  "${linkList[${listIndex}]}" ]]; then
+      ln -sf -T "${linkList[${listIndex}]}" "${configDir}/001-last-session.desktop"
+    fi
+
+    if [[ -z "${defaultSession}" ]]; then
+      pushCommand "$((listIndex+1))"
+      cmdDefault
+    fi
+  fi
+
+  runSession "${listIndex}"
+}
+
+cmdWhitelist() {
+  case "$1" in
+    add)    addToList "whitelist"; ;;
+    remove) removeFromList "whitelist"; ;;
+    *)      exitError "FATAL: Not handeld by cmdWhitelist: $1"; ;;
+  esac
+}
+
+parmOfOption() {
+  local -i i=0
+
+  while
+    [[ $i < ${#argList[@]} ]]
+  do
+    [[ "${argList[$i]}" == "--$1" ]] && break
+    (( ++i ))
+  done
+
+  if (( ++i < ${#argList[@]} )); then
+    echo "${argList[$i]}"
+  fi
+}
+
+noMoreCommand() { [[ "${#cmdStack[@]}" == "0" ]]; }
+clearCommands() { cmdStack=(); }
+
+prompt() {
+  local promptText="${promptCol}${menuPrompt}${txtNormal}"
+
+  while noMoreCommand
+  do
+    # We want to give a hint after a while, but because in meanwhile
+    # the user may write down his command the input would discard.
+    # That's why we wait for the first key stroke
+    # FIXME: With -e is a new line printed after key stroke
+    read -s -n 1 -t 12 -p "${promptText} " userInput;
+    if [[ $? > 128 ]]; then
+      print $'\r'"${tbsmColor}Hint:${txtNormal} 1-${#nameList[@]} b d l m qm q r s w ?"
+    elif [[ -z "${userInput}" ]]; then
+      pushCommand "quick-menu"
+      echo
+      continue
+    elif [[ ! ("$userInput" =~ ^[-a-z0-9?]) ]]; then
+      userInput=""
+      # Flush keyboard if e.q. cursor key was pressed
+      # http://superuser.com/a/364421
+      read -t 0.01 -n 100
+      printf $'\r'
+      continue
+    fi
+
+    printf $'\r'
+    # http://stackoverflow.com/a/25000195
+    read -erp "${promptText} " -i "$userInput" -a userInput ;
+
+    if [[ -z "${userInput}" ]]; then
+      pushCommand "quick-menu"
+    elif [[ "${userInput[0]}" =~ ^[1-9]*[0-9]+$ ]]; then
+      pushCommand "run" "${userInput[0]}"
+
+    # Ignore any input not matched a normal char, hyphen or the ?
+    # Why? Why not?
+    elif [[ "${userInput[0]}" =~ ^(\?|-*|[a-z]+$) ]]; then
+      pushCommand "${userInput[@]}"
+
+    # FIXME: Find a solution not to print a newline with 'read -e'
+    #        and stay on the line. Could be done in a loop reading only one char
+    # like above in our first read step to show the hint at time out
+    #else
+    #  printf $'\r'
+    fi
+  done
+}
+
+#
+# Let's get ready to rumble!
+#
+hasOption "verbose"  && protectedVerbose=("3")
+hasOption "info"     && protectedVerbose=("2")
+hasOption "silent"   && protectedVerbose=("1")
+hasOption "quiet"    && protectedVerbose=("0")
+declare -r protectedVerbose  # Now he fit his name
+[[ -n "${protectedVerbose}" ]] && verboseLevel=("${protectedVerbose}")
+
+checkConfigDir
+readConfigFile
+hasOption "theme" && theme=$(parmOfOption "theme")
+if [[ -n "${theme}" ]]; then
+  readConfigFile "themes/${theme}" && info "Use theme: ${theme}"
+fi
+
+# FIXME: Do you know a way to "re-eval" strings with variables in it so we can
+#        simple 'declare' all these on top of file but have effect if a config
+#        file change e.g. a color?
+# Our default theme has to be modest, but should showcase the possibilities
+[[ -z "$txtNormal" ]]     && txtNormal="${txtClean}"  # The reset key to show ordinary text
+[[ -z "$tbsmColor" ]]     && tbsmColor="${txtBold}"
+[[ -z "$promptCol" ]]     && promptCol="${tbsmColor}"
+[[ -z "$menuTitle" ]]     && menuTitle="${tbsmColor}T${txtNormal}erminal ${tbsmColor}B${txtNormal}ased ${tbsmColor}S${txtNormal}ession ${tbsmColor}M${txtNormal}anager (${tbsmColor}${myName}${txtNormal} v${myVersion})"
+[[ -z "$menuSeparator" ]] && menuSeparator="--------------------------------------------"
+[[ -z "$menuPrompt" ]]    && menuPrompt="${myName}:"
+[[ -z "$quickPrompt" ]]   && quickPrompt="${myName}:${txtNormal} What's next?"
+[[ -z "$infoPrefix" ]]    && infoPrefix=" ${tbsmColor}i${txtNormal} ${myName}:"
+[[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}:"
+[[ -z "$errorPrefix" ]]   && errorPrefix=" ${colRed}Err${txtNormal} ${myName}:"
+
+# If no command given (-z) or starts with "--" show menu
+if [[ -z "${1}" || "${1}" == --* ]]; then
+  pushCommand "menu"
+else
+  pushCommand "quit"
+
+  # Remove every option from the command line
+  # FIXME: Did you got it without to copy in a help variable?
+  IamToStupid="$*"
+  IamToStupid="${IamToStupid%%--*}"
+  # Don't quote here or it will not work as desired
+  pushCommand ${IamToStupid[@]}
+fi
+
+#
+# Hey! Ho! Let's Go!
+#
+while popCommand
+do
+  case "${command}" in
+    blacklist|b)    cmdBlacklist "add"                          ; ;;
+   -blacklist|-b)   cmdBlacklist "remove"                       ; ;;
+    doc)            cmdDoc                                      ; ;;
+    default|d)      cmdDefault                                  ; ;;
+    help|h)         cmdHelp                                     ; ;;
+    list|l)         cmdList                                     ; ;;
+    menu|m)         cmdMenu                                     ; ;;
+    quick-menu|qm)  cmdQMenu                                    ; ;;
+    quit|q)         exitNormal                                  ; ;;
+    run|r)          cmdRun                                      ; ;;
+    search|s)       cmdSearch                                   ; ;;
+    whitelist|w)    cmdWhitelist "add"                          ; ;;
+   -whitelist|-w)   cmdWhitelist "remove"                       ; ;;
+
+    # Short hands
+    \?)             pushCommand "help" "short"                  ; ;;
+    lb)             pushCommand "list" "b"                      ; ;;
+    lw)             pushCommand "list" "w"                      ; ;;
+    lc)             pushCommand "list" "c"                      ; ;;
+    [1-9]|[1-9][0-9])
+                    pushCommand "run" "$command"                ; ;;
+
+    # Try to catch lazy written b w commands
+    [bw][1-9])      pushCommand ${command:0:1} ${command:1}     ; ;;
+   -[bw][1-9])      pushCommand ${command:0:2} ${command:2}     ; ;;
+
+    *)              error "Unknown command: ${command}"         ; ;;
+  esac
+
+  prompt
+
+done
