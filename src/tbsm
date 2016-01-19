@@ -365,62 +365,10 @@ runSession() {
   case ${flagList[${listIndex}]} in
     # *C*onsole programs.
     [Cc])
-#       # If $bin is a login shell, it might `exec' cdm again, causing an endless
-#       # loop. To solve this problem, export $CDM_SPAWN when `exec'ing $bin and
-#       # only let the shell automatically `exec' cdm when $CDM_SPAWN is not set.
-#       # See also the example shell profile file shipped with the cdm package.
-#
-#       # Also untrap SIGINT and SIGTSTP before spawning process: If this is not
-#       # done, any child process of any child (bash) shell will completely
-#       # ignore SIGINT, which is rather confusing, and cannot be undone.
-#
-#       trap - SIGINT SIGTSTP
-#       CDM_SPAWN=$$ exec "${bin[@]}"
       info "Run command: exec ${bin[@]}"
       exec ${bin[@]}
       ;;
     [Xx])
-#       # If X is already running and locktty=yes, activate it.
-#       if $(yesno locktty) && xdpyinfo -display ":$display.0" &> /dev/null; then
-#           chvt "$((display+xtty))"
-#           exitnormal
-#       fi
-#
-#       # Get the first empty display.
-#       display=0
-#       while ((display < 7)); do
-#           if dpyinfo=$(xdpyinfo -display ":$display.0" 2>&1 1>/dev/null) ||
-#                                                               # Display is in use by another user.
-#               [[ "$dpyinfo" == 'No protocol specified'* ]] ||
-#                                                               # Invalid MIT cookie.
-#               [[ "$dpyinfo" == 'Invalid MIT'* ]]
-#           then
-#               let display+=1
-#           else
-#               break
-#           fi
-#       done
-#
-#       # Support for running X in current tty.
-#       if [[ $xtty == 'keep' ]]; then
-#           vt="$(tty)"
-#           if [[ "$vt" != '/dev/tty'* ]]; then
-#               error 'invalid TTY.'
-#               exiterror
-#           fi
-#
-#           vt="${vt#/dev/tty}"
-#       fi
-#
-#       serverargs=(":${display}" "${serverargs[@]}" "vt$vt")
-#           if exec startx   -- "${serverargs[@]}" > "$startxlog" 2>&1
-#       then
-#           exitnormal
-#       else
-#           warn "\`cdm' exited unsuccessfully."
-#           exiterror
-#       fi
-
       info "Run command: startx ${bin[@]}"
       startx ${bin[@]} -- "${XserverArg[@]}"
       ;;
