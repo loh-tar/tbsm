@@ -537,7 +537,7 @@ cmdHelp() {
   popArgument
 
   if [[ "${argument}" != "short" ]]; then
-    print "This is ${myName} (v${myVersion}) - ${myDescribtion}"
+    print "This is ${myName} (v${myVersion}) - ${myDescription}"
     print "Usage:"
     print "${ind}${myName} [COMMAND [argument..]] [OPTION [argument..] ..]"
     print
