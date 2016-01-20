@@ -38,7 +38,7 @@
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
 declare -r myVersion="0.1" # Jan 2016
-declare -r myDescribtion="A pure bash session or application launcher. Inspired by cdm, tdm and krunner."
+declare -r myDescription="A pure bash session or application launcher. Inspired by cdm, tdm and krunner."
 declare -r systemConfigDir="/etc/xdg/${myName}"
 declare -r configDir="${HOME}/.config/${myName}"
 declare -r installPfad=""
