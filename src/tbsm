@@ -274,7 +274,11 @@ parseDesktopFiles() {
       # The .desktop files allow there Exec keys to use $PATH lookup.
       binItem="$(which "${execKey%%[ ]*}" 2>/dev/null)"
       # If which fails to return valid path, skip to next .desktop file.
-      if [[ $? != 0 ]]; then continue; fi
+      if [[ $? != 0 ]]
+        then
+        info "Skip '$nameKey' Binary found not: ${execKey%%[ ]*}"
+        continue
+      fi
       binList+=("${binItem} ${execKey#*[ ]}")
       flagList+=("${flag}")
       nameList+=("${nameKey}")
