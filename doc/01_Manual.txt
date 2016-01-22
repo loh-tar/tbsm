@@ -4,8 +4,9 @@ Index
 1- Introduction
 2- Things Of Interest
 3- Post Install Tasks
-4- Thanks To
-5- Copying
+4- Contact
+5- Thanks To
+6- Copying
 
 
 1- Introduction
@@ -68,14 +69,27 @@ Take a look at /etc/xdg/tbsm/tbsm.conf and subfolders.
 Create your own theme files in ~/.config/tbsm/themes.
 
 
-4- Thanks To
+4- Contact
+============
+The home of tbsm
+  https://github.com/loh-tar/tbsm
+
+Arch forum talk
+  https://bbs.archlinux.org/viewtopic.php?id=207817
+
+The author of that all
+  loh.tar@googlemail.com
+
+
+5- Thanks To
 ==============
 All contributors of cdm and tdm,
-stackexchange.com, bash-hackers.org, google.com and many more.
+stackexchange.com, bash-hackers.org, dict.cc, google.com,
+many more I have miss to note (sorry!), but not github.com for kindly hosting.
 Last but not least: Mom & Dad and archlinux.org
 
 
-5- Copying
+6- Copying
 ============
 Copyright (C) 2016 loh.tar@googlemail.com
 
