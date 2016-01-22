@@ -272,7 +272,7 @@ parseDesktopFiles() {
     if [[ "${flag}" == "true" ]]; then flag="C"; else flag="X"; fi
     if [[ -n ${execKey} && -n ${nameKey} ]]; then
       # The .desktop files allow there Exec keys to use $PATH lookup.
-      binItem="$(which $(cut -f 1 -d ' ' <<< ${execKey}))"
+      binItem="$(which $(cut -f 1 -d ' ' <<< ${execKey}) 2>/dev/null)"
       # If which fails to return valid path, skip to next .desktop file.
       if [[ $? != 0 ]]; then continue; fi
       binList+=("${binItem} $(cut -s -f 2- -d ' ' <<< ${execKey})")
