@@ -311,7 +311,7 @@ cmdSearch() {
   clearLists
 
   if [[ -d "${filePfad}" ]]; then
-    desktopFiles=($(grep -Ril --include="*.desktop" $pattern $filePfad | sort))
+    desktopFiles=($(grep -Ril --include="*.desktop" "$pattern" "$filePfad" | sort))
     info "Found matches: ${#desktopFiles[@]}"
     parseDesktopFiles
   else
@@ -412,7 +412,7 @@ showQuickMenu() {
 }
 
 showMenu() {
-  printMenuHeader $1
+  printMenuHeader "$1"
   printMenuList
   printMenuFooter
 }
@@ -488,7 +488,7 @@ cmdBlacklist() {
   case "$1" in
     add)    addToList "blacklist"; ;;
     remove) removeFromList "blacklist"; ;;
-    *)      exitError "FATAL: Not handeld by cmdBlacklist $1"; ;;
+    *)      exitError "FATAL: Not handeld by cmdBlacklist: $1"; ;;
   esac
 }
 
@@ -519,14 +519,14 @@ cmdDoc() {
 
   if [[ ${#docMatch[@]} -gt 1 ]]; then
     print "Available documentation:"
-    for doc in ${docMatch[@]} ; do
+    for doc in "${docMatch[@]}" ; do
       doc="${doc#*/??_}"
       print "  ${doc%.*}"
     done
-  elif [[ -z $docMatch ]]; then
+  elif [[ -z "$docMatch" ]]; then
       print "No manual match '${argument}'"
   else
-   less $docMatch
+   less "$docMatch"
   fi
 }
 
