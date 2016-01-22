@@ -1,3 +1,9 @@
+2016-01-22  v0.2
+=======================================
+Fix: Suppress 'which' error message if no binary was found
+Makefile: Remove license quirk, add source quirk
+
+
 2016-01-19  v0.1  [YANKED]
 =======================================
 
