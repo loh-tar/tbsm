@@ -2,7 +2,7 @@
 #
 #   tbsm: Terminal Based Session Manager
 #
-#   Copyright (C) 2016 loh.tar@googlemail.com
+#   Copyright (C) 2016, 2017 loh.tar@googlemail.com
 #
 #   Thanks to:
 #     CDM: The Console Display Manager
@@ -37,7 +37,7 @@
 
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
-declare -r myVersion="0.2" # Jan 2016
+declare -r myVersion="0.3" # Jul 2017
 declare -r myDescription="A pure bash session or application launcher. Inspired by cdm, tdm and krunner."
 declare -r systemConfigDir="/etc/xdg/${myName}"
 declare -r configDir="${HOME}/.config/${myName}"
