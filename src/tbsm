@@ -562,6 +562,7 @@ cmdHelp() {
     print "${ind}quick-menu, qm${tab}Show the quick menu to select default or last session"
     print "${ind}quit, q${tab}${tab}Hasta la vista, Baby!"
     print "${ind}run, r <n>${tab}${tab}Run the given session number"
+    print "${ind}search, s <pattern>${tab}Search an application of your interest"
     print "${ind}whitelist, w <n..>${tab}Add/remove entries on the Whitelist. Use -w to remove"
     print "For your convenience there are some short hands: lb lc lw <n> ?"
   if [[ "${argument}" != "short" ]]; then
