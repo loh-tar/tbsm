@@ -84,14 +84,14 @@ declare -r colWhite=$'\e[37m'
 # Other theme related variables see near end of file, search for 'default theme'
 
 pushCommand() {
-  command="${1}"
-  [[ -z "${command}" ]] && return
+  [[ -z "${1}" ]] && return
 
-  shift
-
-  cmdStack=("${cmdStack[@]}" "$@");
-  cmdStack=("${cmdStack[@]}" "${command}");
-# # #   echo "push cmd: $command"
+  # Push all arguments in reverse order on the stack
+  # https://stackoverflow.com/a/32647351
+  for ((i = $#; i > 0; i--)); do
+    cmdStack+=("${!i}");
+# # #     echo "push cmd: ${!i}"
+  done
 }
 
 popCommand() {
@@ -107,7 +107,7 @@ popCommand() {
 
   command="${cmdStack[${last}]}";
   cmdStack=(${cmdStack[@]:0:last})
-# # #   echo "poped: $command"
+# # #   echo "pop  cmd: $command"
 }
 
 popArgument() {
@@ -141,9 +141,9 @@ popListIndex() {
   [[ "${#linkList[@]}" -eq "0" ]] && fillLists
 
   if [[ ! ("${argument}" =~ ^[1-9]+[0-9]*$) ]]; then
-    # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
-    error "${FUNCNAME[-2]:3}: Not my kind of number: ${argument}"
-    return 2
+    # Not a (valid) number, we assume it's the next command
+    pushCommand "$argument"
+    return 1
   elif [[ "$argument" -gt "${#linkList[@]}" ]]; then
     error "${FUNCNAME[-2]:3}: Selection number too big: ${argument}"
     return 2
@@ -411,7 +411,8 @@ showQuickMenu() {
   if [[ "${userInput}" == "!" ]]; then runSession "0"
   elif [[ -z "${userInput}" ]]; then runSession "1"
   else
-    pushCommand "${userInput#!}"
+    # Don't quote here or it will not work as intended
+    pushCommand ${userInput#!}
   fi
 }
 
