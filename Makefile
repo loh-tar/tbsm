@@ -11,7 +11,7 @@ install:
 	install -pDm644 -t ${DESTDIR}/etc/xdg/${MyName} src/${MyName}.conf
 	install -pDm644 -t ${DESTDIR}/etc/xdg/${MyName}/themes themes/*
 	install -pDm644 -t ${DESTDIR}/usr/share/doc/${MyName} doc/*
-	ln -sr -T ${DESTDIR}/usr/bin/${MyName} ${DESTDIR}/usr/share/doc/${MyName}/"70_SourceCode"
+	ln -srf -T ${DESTDIR}/usr/bin/${MyName} ${DESTDIR}/usr/share/doc/${MyName}/"70_SourceCode"
 
 uninstall:
 	rm -f  ${DESTDIR}/usr/bin/${MyName}
