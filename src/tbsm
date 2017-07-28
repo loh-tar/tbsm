@@ -416,7 +416,7 @@ showQuickMenu() {
 }
 
 showMenu() {
-  printMenuHeader "$1"
+  printMenuHeader $1
   printMenuList
   printMenuFooter
 }
