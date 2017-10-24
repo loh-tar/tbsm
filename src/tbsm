@@ -42,6 +42,7 @@ declare -r myDescription="A pure bash session or application launcher. Inspired 
 declare -r systemConfigDir="/etc/xdg/${myName}"
 declare -r configDir="${HOME}/.config/${myName}"
 declare -r installPfad=""
+declare    runInTTY="yes"
 declare    protectedVerbose
 declare    lastSession
 declare -i lastSessionIndex
@@ -373,8 +374,12 @@ runSession() {
       exec ${bin[@]}
       ;;
     [Xx])
-      info "Run command: startx ${bin[@]}"
-      startx ${bin[@]} -- "${XserverArg[@]}"
+      if [[ $runInTTY ]]; then
+        info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
+        startx ${bin[@]} -- ${XserverArg[@]}
+      else
+        info "Not running in tty. Will not start X session."
+      fi
       ;;
     -)
       exitNormal "Have a nice day"
@@ -764,6 +769,9 @@ fi
 [[ -z "$infoPrefix" ]]    && infoPrefix=" ${tbsmColor}i${txtNormal} ${myName}:"
 [[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}:"
 [[ -z "$errorPrefix" ]]   && errorPrefix=" ${colRed}Err${txtNormal} ${myName}:"
+
+# https://unix.stackexchange.com/a/96466
+[[ ! $(tty) =~ /dev/tty[0-9] ]] && unset runInTTY
 
 # If no command given (-z) or starts with "--" show menu
 if [[ -z "${1}" || "${1}" == --* ]]; then
