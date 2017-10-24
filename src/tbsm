@@ -558,6 +558,7 @@ cmdHelp() {
     print "${ind}blacklist, b <n..>${tab}Add/remove entries on the Blacklist. Use -b to remove"
     print "${ind}default, d <n>${tab}Save session as the default session"
     print "${ind}doc [pattern]${tab}${tab}List or show documentation files"
+    print "${ind}exit, X${tab}${tab}Logout from tty or quit"
   if [[ "${argument}" != "short" ]]; then
     print "${ind}help, h${tab}${tab}You read it now"
   else
@@ -623,6 +624,16 @@ cmdList() {
   # No showMenu here, keep the theme away and list it simple
   print "${title}"
   printMenuList
+}
+
+cmdLogout() {
+  if [[ $runInTTY ]]; then
+    # Logout is not easy from inside a script. Can you do it better?
+    myPid=$$
+    kill -SIGHUP $(ps -ef | awk '($2=="'$myPid'"){print $3}')
+  else
+    exitNormal
+  fi
 }
 
 cmdMenu() {
@@ -696,12 +707,12 @@ prompt() {
     # FIXME: With -e is a new line printed after key stroke
     read -s -n 1 -t 12 -p "${promptText} " userInput;
     if [[ $? > 128 ]]; then
-      print $'\r'"${tbsmColor}Hint:${txtNormal} 1-${#nameList[@]} b d l m qm q r s w ?"
+      print $'\r'"${tbsmColor}Hint:${txtNormal} 1-${#nameList[@]} b d l m qm q r s w X ?"
     elif [[ -z "${userInput}" ]]; then
       pushCommand "quick-menu"
       echo
       continue
-    elif [[ ! ("$userInput" =~ ^[-a-z0-9?]) ]]; then
+    elif [[ ! ("$userInput" =~ ^[-a-zX0-9?]) ]]; then
       userInput=""
       # Flush keyboard if e.q. cursor key was pressed
       # http://superuser.com/a/364421
@@ -806,6 +817,7 @@ do
     search|s)       cmdSearch                                   ; ;;
     whitelist|w)    cmdWhitelist "add"                          ; ;;
    -whitelist|-w)   cmdWhitelist "remove"                       ; ;;
+    exit|X)         cmdLogout                                   ; ;;
 
     # Short hands
     \?|-\?|-h)      pushCommand "help" "short"                  ; ;;
