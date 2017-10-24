@@ -731,6 +731,11 @@ prompt() {
 #
 # Let's get ready to rumble!
 #
+
+# Remove silently dead links in case something was deinstalled
+# https://unix.stackexchange.com/a/38691
+find "$configDir" -type l -exec test ! -e {} \; -exec unlink {} \;
+
 hasOption "verbose"  && protectedVerbose=("3")
 hasOption "info"     && protectedVerbose=("2")
 hasOption "silent"   && protectedVerbose=("1")
