@@ -800,7 +800,7 @@ do
    -whitelist|-w)   cmdWhitelist "remove"                       ; ;;
 
     # Short hands
-    \?)             pushCommand "help" "short"                  ; ;;
+    \?|-\?|-h)      pushCommand "help" "short"                  ; ;;
     lb)             pushCommand "list" "b"                      ; ;;
     lw)             pushCommand "list" "w"                      ; ;;
     lc)             pushCommand "list" "c"                      ; ;;
