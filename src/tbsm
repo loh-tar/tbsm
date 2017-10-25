@@ -280,7 +280,7 @@ parseDesktopFiles() {
         info "Skip '$nameKey' Binary found not: ${execKey%%[ ]*}"
         continue
       fi
-      binList+=("${binItem} ${execKey#*[ ]}")
+      binList+=("${binItem} ${execKey#*${execKey%%[ ]*}}")
       flagList+=("${flag}")
       nameList+=("${nameKey}")
       linkList+=("${realLink}")
