@@ -159,9 +159,9 @@ hasOption() { [[ "${argList[@]}" == *"--$1"* ]]; }
 # It's better not to use echo
 # http://unix.stackexchange.com/a/65819
 print() { [[ ${verboseLevel} -gt "0" ]] && printf "%s\n" "$*"; }
-info()  { [[ ${verboseLevel} -gt "1" ]] && print "${infoPrefix} $*" >&2 ; }
-warn()  { [[ ${verboseLevel} -gt "2" ]] && (print "${warnPrefix} $*") >&2 ; }
-error() { (print "${errorPrefix} $*") >&2 ; }
+info()  { [[ ${verboseLevel} -gt "1" ]] && print "${infoPrefix}$*" >&2 ; }
+warn()  { [[ ${verboseLevel} -gt "2" ]] && (print "${warnPrefix}$*") >&2 ; }
+error() { (print "${errorPrefix}$*") >&2 ; }
 exitNormal() { [[ -n "$1" ]] && print "$*"; exit 0; }
 exitError()  { error "$*"; exit 1; }
 exitCancel() { error "$*"; exit 2; }
@@ -798,9 +798,9 @@ fi
 [[ -z "$menuSeparator" ]] && menuSeparator="--------------------------------------------"
 [[ -z "$menuPrompt" ]]    && menuPrompt="${myName}:"
 [[ -z "$quickPrompt" ]]   && quickPrompt="${myName}:${txtNormal} What's next?"
-[[ -z "$infoPrefix" ]]    && infoPrefix=" ${tbsmColor}i${txtNormal} ${myName}:"
-[[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}:"
-[[ -z "$errorPrefix" ]]   && errorPrefix=" ${colRed}Err${txtNormal} ${myName}:"
+[[ -z "$infoPrefix" ]]    && infoPrefix=" ${tbsmColor}i${txtNormal} ${myName}: "
+[[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}: "
+[[ -z "$errorPrefix" ]]   && errorPrefix=" ${colRed}E${txtNormal} ${myName}: "
 
 # https://unix.stackexchange.com/a/96466
 [[ ! $(tty) =~ /dev/tty[0-9] ]] && unset runInTTY
