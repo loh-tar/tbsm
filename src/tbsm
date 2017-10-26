@@ -381,12 +381,11 @@ runSession() {
 
   # Run $bin according to its flag.
   case ${flagList[${listIndex}]} in
-    # *C*onsole programs.
-    C)
-      info "Run command: exec ${bin[@]}"
-      exec ${bin[@]}
+    C)  # Console programs
+      info "Run command: ${bin[@]}"
+      ${bin[@]}
       ;;
-    S)
+    S)  # Sessions
       if [[ $runInTTY ]]; then
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
@@ -395,7 +394,7 @@ runSession() {
         return 1
       fi
       ;;
-    X)
+    X)  # Applications
       if [[ $runInTTY ]]; then
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
@@ -404,10 +403,10 @@ runSession() {
         ${bin[@]}
       fi
       ;;
-    -)
+    -)  # Old cdm/tdm stuff, not used
       exitNormal "Have a nice day"
       ;;
-    *)
+    *)  # Old cdm/tdm stuff, should never happens
       exitError "Unknown flag: ${flagList[${listIndex}]}"
       ;;
   esac
