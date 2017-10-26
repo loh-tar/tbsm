@@ -729,7 +729,7 @@ prompt() {
     # FIXME: With -e is a new line printed after key stroke
     read -s -n 1 -t 12 -p "${promptText} " userInput;
     if [[ $? > 128 ]]; then
-      print $'\r'"${tbsmColor}Hint:${txtNormal} 1-${#nameList[@]} b d l m qm q r s w X ?"
+      print $'\r'"${menuHint} 1-${#nameList[@]} b d l m qm q r s w X ?"
     elif [[ -z "${userInput}" ]]; then
       pushCommand "quick-menu"
       echo
@@ -797,6 +797,7 @@ fi
 [[ -z "$menuTitle" ]]     && menuTitle="${tbsmColor}T${txtNormal}erminal ${tbsmColor}B${txtNormal}ased ${tbsmColor}S${txtNormal}ession ${tbsmColor}M${txtNormal}anager (${tbsmColor}${myName}${txtNormal} v${myVersion})"
 [[ -z "$menuSeparator" ]] && menuSeparator="--------------------------------------------"
 [[ -z "$menuPrompt" ]]    && menuPrompt="${myName}:"
+[[ -z "$menuHint" ]]      && menuHint="${tbsmColor}Hint:${txtNormal}"
 [[ -z "$quickPrompt" ]]   && quickPrompt="${myName}:${txtNormal} What's next?"
 [[ -z "$infoPrefix" ]]    && infoPrefix=" ${tbsmColor}i${txtNormal} ${myName}: "
 [[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}: "

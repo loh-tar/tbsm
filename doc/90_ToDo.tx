@@ -27,3 +27,6 @@ L: Add command '-' to remove an entry from current list. One keystroke less than
 L: Add command '+' if '-' is implemented to be coherent
 L: Add command 'list themes' and display author/name/description
 L: Add individual menu seperators top/middle/bottom and show them individual
+L: Review theme stuff. Actual there is a crude mix of <color><text><color>
+   using. Sometimes the color is in the config var sometimes not.
+
