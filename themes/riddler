@@ -3,7 +3,12 @@
 # Description: From Gotham with love
 
 tbsmColor="${colGreen}"
+txtNormal="${txtClean}"
+infoPrefix="  ${tbsmColor}i${txtNormal} "
+warnPrefix="  ${colYello}W${txtNormal} "
+errorPrefix="  ${colRed}E${txtNormal} "
 menuPrompt="  ?"
+menuHint="  ${tbsmColor}!${txtNormal}"
 quickPrompt="  ?"
 #quickPrompt="  ? ${myName}:"
 noSeparator="true"
