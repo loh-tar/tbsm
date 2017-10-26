@@ -254,6 +254,7 @@ parseDesktopFiles() {
   local binItem
   local realLink
   local flag
+  local val
 
   #TODO: allow full quoting and expansion according to desktop entry spec:
   # http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
@@ -269,8 +270,20 @@ parseDesktopFiles() {
     # http://stackoverflow.com/a/22550813
     execKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Exec=//p}' ${desktopFiles[${count}]})
     nameKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Name=//p}' ${desktopFiles[${count}]})
-    flag=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Terminal=//p}' ${desktopFiles[${count}]})
-    if [[ "${flag}" == "true" ]]; then flag="C"; else flag="X"; fi
+    # Sadly have only the plasma.desktop file an entry with "Type=XSession", all
+    # other (sorry, the few I have seen) says "Type=Application", so work around this
+    flag="X"
+    if [[ $realLink == *"xsessions"* ]]; then
+      flag="S"    # Treat all in /usr/share/xsessions as such
+    else
+      val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Type=//p}' ${desktopFiles[${count}]})
+      if [[ "${val}" == "XSession" ]]; then
+        flag="S"  # Takes action when there is a real local file, not a link
+      else
+        val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Terminal=//p}' ${desktopFiles[${count}]})
+        [[ "${val}" == "true" ]] && flag="C"
+      fi
+    fi
     if [[ -n ${execKey} && -n ${nameKey} ]]; then
       # The .desktop files allow there Exec keys to use $PATH lookup.
       binItem="$(which "${execKey%%[ ]*}" 2>/dev/null)"
@@ -369,16 +382,26 @@ runSession() {
   # Run $bin according to its flag.
   case ${flagList[${listIndex}]} in
     # *C*onsole programs.
-    [Cc])
+    C)
       info "Run command: exec ${bin[@]}"
       exec ${bin[@]}
       ;;
-    [Xx])
+    S)
       if [[ $runInTTY ]]; then
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
-        info "Not running in tty. Will not start X session."
+        error "Not running in tty. Will not start X session."
+        return 1
+      fi
+      ;;
+    X)
+      if [[ $runInTTY ]]; then
+        info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
+        startx ${bin[@]} -- ${XserverArg[@]}
+      else
+        info "Not running in tty, run: ${bin[@]}"
+        ${bin[@]}
       fi
       ;;
     -)
