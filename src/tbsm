@@ -770,10 +770,6 @@ prompt() {
 # Let's get ready to rumble!
 #
 
-# Remove silently dead links in case something was deinstalled
-# https://unix.stackexchange.com/a/38691
-find "$configDir" -type l -exec test ! -e {} \; -exec unlink {} \;
-
 hasOption "verbose"  && protectedVerbose=("3")
 hasOption "info"     && protectedVerbose=("2")
 hasOption "silent"   && protectedVerbose=("1")
@@ -782,6 +778,9 @@ declare -r protectedVerbose  # Now he fit his name
 [[ -n "${protectedVerbose}" ]] && verboseLevel=("${protectedVerbose}")
 
 checkConfigDir
+# Remove silently dead links in case something was deinstalled
+# https://unix.stackexchange.com/a/38691
+find "$configDir" -type l -exec test ! -e {} \; -exec unlink {} \;
 readConfigFile
 hasOption "theme" && theme=$(parmOfOption "theme")
 if [[ -n "${theme}" ]]; then
