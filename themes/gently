@@ -3,4 +3,4 @@
 # Description: Unobtrusive and reticent but not austere
 
 noSeparator="true"
-verboseLevel=1
+verboseLevel="2"

@@ -3,6 +3,6 @@
 # Description: Anything but fun
 
 noSeparator="true"
-tbsmColor=${txtClean}
+tbsmColor="${txtClean}"
 quickPrompt="Choose:"
-verboseLevel=1
+verboseLevel="2"

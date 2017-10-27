@@ -58,7 +58,7 @@ declare -a argList=("$@")         # haha!
 declare    command                # Used by popCommand. tbsm own command to execute
 declare    argument               # Used by popArgument
 declare -a cmdStack=()            # Stack of tbsm own commands
-declare    verboseLevel="2"       # 0=quiet, 1=silent=only errors, 2=infos, 3=verbose=warnings
+declare    verboseLevel="3"       # 0=quiet, 1=silent, 2=info, 3=verbose
 
 # More about colors at Arch Wiki
 # https://wiki.archlinux.org/index.php/Color_Bash_Prompt
@@ -159,9 +159,9 @@ hasOption() { [[ "${argList[@]}" == *"--$1"* ]]; }
 # It's better not to use echo
 # http://unix.stackexchange.com/a/65819
 print() { [[ ${verboseLevel} -gt "0" ]] && printf "%s\n" "$*"; }
-info()  { [[ ${verboseLevel} -gt "1" ]] && print "${infoPrefix}$*" >&2 ; }
-warn()  { [[ ${verboseLevel} -gt "2" ]] && (print "${warnPrefix}$*") >&2 ; }
-error() { (print "${errorPrefix}$*") >&2 ; }
+warn()  { [[ ${verboseLevel} -gt "1" ]] && print "${warnPrefix}$*" >&2 ; }
+info()  { [[ ${verboseLevel} -gt "2" ]] && print "${infoPrefix}$*" >&2 ; }
+error() { print "${errorPrefix}$*" >&2 ; }
 exitNormal() { [[ -n "$1" ]] && print "$*"; exit 0; }
 exitError()  { error "$*"; exit 1; }
 exitCancel() { error "$*"; exit 2; }
@@ -203,10 +203,10 @@ readConfigFile() {
   done
 
   if (( !$ok )); then
-    warn "Config file not found: ${cfgFile##*/}"
-    warn "+-Searched in: ${failPath[0]%/*}/"
+    error "Config file not found: ${cfgFile##*/}"
+    error "+-Searched in: ${failPath[0]%/*}/"
     for path in ${failPath[@]:1}; do
-      warn "+------------: ${path%/*}/"
+      error "+------------: ${path%/*}/"
     done
     return 1
   fi
@@ -290,7 +290,7 @@ parseDesktopFiles() {
       # If which fails to return valid path, skip to next .desktop file.
       if [[ $? != 0 ]]
         then
-        info "Skip '$nameKey' Binary found not: ${execKey%%[ ]*}"
+        warn "Skip '$nameKey' Binary found not: ${execKey%%[ ]*}"
         continue
       fi
       binList+=("${binItem} ${execKey#*${execKey%%[ ]*}}")
@@ -312,7 +312,7 @@ readDesktopFiles() {
     desktopFiles=($(find "${filePfad}" -maxdepth 1 -regex .\*.desktop | sort))
     parseDesktopFiles
   else
-    warn "${FUNCNAME[0]}: Pfad not found: ${filePfad}"
+    error "${FUNCNAME[0]}: Pfad not found: ${filePfad}"
   fi
 }
 
@@ -333,7 +333,7 @@ cmdSearch() {
     info "Found matches: ${#desktopFiles[@]}"
     parseDesktopFiles
   else
-    warn "${FUNCNAME[0]:3}: Pfad not found: ${filePfad}"
+    error "${FUNCNAME[0]:3}: Pfad not found: ${filePfad}"
   fi
 
   print "Applications matching '$pattern'"
@@ -390,7 +390,7 @@ runSession() {
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
-        error "Not running in tty. Will not start X session."
+        info "Not running in tty. Will not start X session."
         return 1
       fi
       ;;
@@ -463,7 +463,7 @@ addToList() {
     esac
 
     if [[ "${linkList[${listIndex}]}" == "-" ]]; then
-      info "Session can't ${list}ed: ${nameList[${listIndex}]}"
+      warn "Session can't ${list}ed: ${nameList[${listIndex}]}"
       continue
     fi
 
@@ -532,7 +532,7 @@ cmdDefault() {
   esac
 
   if [[ "${linkList[${listIndex}]}" == "-" ]]; then
-    info "Session can't saved as default: ${nameList[${listIndex}]}"
+    warn "Session can't saved as default: ${nameList[${listIndex}]}"
     return
   fi
 
@@ -806,6 +806,7 @@ fi
 # Check if running in tty and set X displaynumber
 runInTTY=$(tty)
 if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
+  warn "Not running in tty. Will not start any X session."
   unset runInTTY
 else
   # Replace @Xdisplay@ with e.g. :1
