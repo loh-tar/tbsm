@@ -26,25 +26,44 @@ available by the quick menu where you can start the default session by simply
 hit <enter> or the last session when you delete the bang ! previous. You can run
 there any command tbsm knows without to remove the bang.
 
+The last run session will not changed when you choose the default session.
+
 You reach the quick menu from the full session menu by hitting <enter> on an
 empty prompt. To go back you have to give the needed command which is 'm'.
 
 You should know that there is not really any special at the 'full session menu'.
 It is only a pimped out listing of your tbsm configuration where as the commands
-'search' and 'list' show a poor list. In any way you can use the listed index
-numbers as argument for any command you like.
+'search' and 'list' show a poor list. In any way you have to use the listed
+index numbers as argument for any command you like.
+
+The quick menu on the other hand is a little special but still works with the
+same intern list, of two entries only, default and last session. You can verify
+this when you give 'l' at the quick menu prompt.
 
 May you have a nice day, I run now 'q'
 
 
 2- Things Of Interest
 =======================
-He only works with .desktop files to start something, there is no other config
-possible.
+He only works with .desktop files to start something, there is no other
+possibility.
 
 When running tbsm without any argument he is scanning for available .desktop
 files in /usr/share/xsessions/ and $configDir/whitelist but skip any file
 referenced in $configDir/blacklist. Whereas $configDir is ~/.config/tbsm.
+
+The latter will created if not exist but not filled with default files, do it
+by yourself if needed. The former will searched for themes and the config file
+but not for white or black listed files.
+
+In the simplest form you can create a config file like so:
+
+    echo "verboseLevel=2" > ~/.config/tbsm/tbsm.conf
+
+Or perhaps:
+
+    echo "theme=austere" > ~/.config/tbsm/tbsm.conf
+
 
 When searching for any pattern he run a grep with the pattern on all .desktop
 files in /usr/share/applications/

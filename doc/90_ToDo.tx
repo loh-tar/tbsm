@@ -29,4 +29,6 @@ L: Add command 'list themes' and display author/name/description
 L: Add individual menu seperators top/middle/bottom and show them individual
 L: Review theme stuff. Actual there is a crude mix of <color><text><color>
    using. Sometimes the color is in the config var sometimes not.
-
+L: Add command 'set' to update/create config the file.
+   'set v 2' or 'set v silent' will write 'verboseLevel=2' and 't austere'
+   'theme=austere' to config file where as 'set foo=bar' will update/set foo
