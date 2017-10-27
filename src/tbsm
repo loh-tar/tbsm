@@ -42,14 +42,15 @@ declare -r myDescription="A pure bash session or application launcher. Inspired 
 declare -r systemConfigDir="/etc/xdg/${myName}"
 declare -r configDir="${HOME}/.config/${myName}"
 declare -r installPfad=""
-declare    runInTTY="yes"
+declare    runInTTY="yes"         # When unset we have no tty, glas is half full
+declare    XserverArg="@Xdisplay@ -nolisten tcp"  # @Xdisplay@ will replaced by number of tty
 declare    protectedVerbose
 declare    lastSession
 declare -i lastSessionIndex
 declare    defaultSession
 declare -i defaultSessionIndex
 declare -a binList=()             # fooList filled with keys out of .desktop files
-declare -a nameList=()            #
+declare -a nameList=()
 declare -a flagList=()
 declare -a linkList=()
 declare -a blacklist=()
@@ -58,7 +59,6 @@ declare    command                # Used by popCommand. tbsm own command to exec
 declare    argument               # Used by popArgument
 declare -a cmdStack=()            # Stack of tbsm own commands
 declare    verboseLevel="2"       # 0=quiet, 1=silent=only errors, 2=infos, 3=verbose=warnings
-declare    XserverArg="-nolisten tcp"
 
 # More about colors at Arch Wiki
 # https://wiki.archlinux.org/index.php/Color_Bash_Prompt
@@ -803,8 +803,14 @@ fi
 [[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}: "
 [[ -z "$errorPrefix" ]]   && errorPrefix=" ${colRed}E${txtNormal} ${myName}: "
 
-# https://unix.stackexchange.com/a/96466
-[[ ! $(tty) =~ /dev/tty[0-9] ]] && unset runInTTY
+# Check if running in tty and set X displaynumber
+runInTTY=$(tty)
+if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
+  unset runInTTY
+else
+  # Replace @Xdisplay@ with e.g. :1
+  XserverArg=${XserverArg/@Xdisplay@/:${runInTTY#/dev/tty}}
+fi
 
 # If no command given (-z) or starts with "--" show menu
 if [[ -z "${1}" || "${1}" == --* ]]; then
