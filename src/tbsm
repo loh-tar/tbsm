@@ -158,10 +158,28 @@ hasOption() { [[ "${argList[@]}" == *"--$1"* ]]; }
 
 # It's better not to use echo
 # http://unix.stackexchange.com/a/65819
-print() { [[ ${verboseLevel} -gt "0" ]] && printf "%s\n" "$*"; }
-warn()  { [[ ${verboseLevel} -gt "1" ]] && print "${warnPrefix}$*" >&2 ; }
-info()  { [[ ${verboseLevel} -gt "2" ]] && print "${infoPrefix}$*" >&2 ; }
-error() { print "${errorPrefix}$*" >&2 ; }
+print() {
+  local vl=${2:-"0"}
+  [[ ${verboseLevel} -gt $vl ]] && printf "%s\n" "$1";
+}
+
+info() {
+  local prefix=${infoPrefix:-" ${txtBold}i${txtClean} ${myName}: "}
+  local vl=${2:-"2"}
+  [[ ${verboseLevel} -gt $vl ]] && print "${prefix}$1" >&2
+}
+
+warn() {
+  local prefix=${warnPrefix:-" ${colYello}W${txtClean} ${myName}: "}
+  local vl=${2:-"1"}
+  [[ ${verboseLevel} -gt $vl ]] && print "${prefix}$1" >&2
+}
+
+error() {
+  local prefix=${errorPrefix:-" ${colRed}E${txtClean} ${myName}: "}
+  print "${prefix}$1" >&2
+}
+
 exitNormal() { [[ -n "$1" ]] && print "$*"; exit 0; }
 exitError()  { error "$*"; exit 1; }
 exitCancel() { error "$*"; exit 2; }
@@ -390,7 +408,7 @@ runSession() {
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
-        info "Not running in tty. Will not start X session."
+        info "Not running in tty. Will not start X session." "1"
         return 1
       fi
       ;;
@@ -468,7 +486,7 @@ addToList() {
     fi
 
     ln -sf "${linkList[${listIndex}]}" "${configDir}/${list}/"
-    info "Session ${list}ed: ${nameList[${listIndex}]}"
+    info "Session ${list}ed: ${nameList[${listIndex}]}" "1"
     ok=1
   done
 
@@ -502,7 +520,7 @@ removeFromList() {
       link=("$(readlink -m ${file})")
       if [[ "${link}" == "${linkList[${listIndex}]}" ]] ; then
         unlink "$file"
-        info "Session removed from ${list}: ${nameList[${listIndex}]}"
+        info "Session removed from ${list}: ${nameList[${listIndex}]}" "1"
       fi
     done
     ok=1
@@ -537,7 +555,7 @@ cmdDefault() {
   fi
 
   ln -sf -T "${linkList[${listIndex}]}" "${configDir}/000-default-session.desktop"
-  info "New default session: ${nameList[${listIndex}]}"
+  info "New default session: ${nameList[${listIndex}]}" "1"
   sleep 1
 }
 
@@ -806,7 +824,7 @@ fi
 # Check if running in tty and set X displaynumber
 runInTTY=$(tty)
 if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
-  warn "Not running in tty. Will not start any X session."
+  info "Not running in tty. Will not start any X session."
   unset runInTTY
 else
   # Replace @Xdisplay@ with e.g. :1
