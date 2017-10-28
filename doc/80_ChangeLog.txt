@@ -1,13 +1,36 @@
+This file should be called, actually, 'Release Notes'. The full changelog can
+you find here: https://github.com/loh-tar/tbsm/commits/master
+
+
+2017-10-28  v0.4
+=======================================
+682e371 - Only start X session from tty
+          This patch is pretty untested and breaks hopefully no use case
+cfc4134 - New command exit/X to logout from tty
+0422ab7 - Fix broken .desktop checking / parameter building
+          Some session didn't start because of this and the too much parameter
+d7ddd83 - Don't start a session when not running in tty
+          Treat all in /usr/share/xsessions as such and with Type=XSession
+e9b76ec - Don't 'exec' terminal programs, just start them
+          Bad idea?
+daf86d9 - Add display name to XserverArg
+          Done by simply use the tty number as X display name
+c16c915 - Review verbosity
+          You may notice some more chattering but verboseLevel=2/info should be
+          ok for daily work, neverless level 3/verbose is default now to become
+          familar
+
+
 2017-07-28  v0.3
 =======================================
-Fix not correct working command line parsing
-Fix: Bring back menu title
+7d1b43d - Fix not correct working command line parsing
+86b1ae1 - Fix: Bring back menu title
 
 
 2016-01-22  v0.2
 =======================================
-Fix: Suppress 'which' error message if no binary was found
-Makefile: Remove license quirk, add source quirk
+4f68a05 - Fix: Suppress 'which' error message if no binary was found
+f90a348 - Makefile: Remove license quirk, add source quirk
 
 
 2016-01-19  v0.1  [YANKED]

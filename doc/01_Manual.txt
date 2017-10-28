@@ -1,4 +1,4 @@
-                                                             tbsm v0.3, Jul 2017
+                                                             tbsm v0.4, Oct 2017
 Index
 =======
 1- Introduction
@@ -57,11 +57,9 @@ by yourself if needed. The former will searched for themes and the config file
 but not for white or black listed files.
 
 In the simplest form you can create a config file like so:
-
     echo "verboseLevel=2" > ~/.config/tbsm/tbsm.conf
 
 Or perhaps:
-
     echo "theme=austere" > ~/.config/tbsm/tbsm.conf
 
 
