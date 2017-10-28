@@ -645,6 +645,7 @@ cmdHelp() {
   else
     print "${ind}help, h${tab}${tab}You used '${argument}' so try it for some more info"
   fi
+    print "${ind}info, i [f|t]${tab}${tab}Show some info, full, themes or only a short note"
     print "${ind}list, l [b|c|w]${tab}List entries. Current, config or black-/whitelist"
     print "${ind}menu, m${tab}${tab}Show the full session menu"
     print "${ind}quick-menu, qm${tab}Show the quick menu to select default or last session"
@@ -672,6 +673,49 @@ cmdHelp() {
     #       print "${ind}${myName}"
     #       print "${ind}${tab}"
   fi
+}
+
+cmdInfo() {
+  popArgument
+
+  if [[ -z "${argument}" || "${argument}" == "f" ]]; then
+    print "Version          : ${myVersion}"
+    print "System Config Dir: ${systemConfigDir}"
+    print "User Config Dir  : ${configDir}"
+    print "Verbose Level    : ${verboseLevel}"
+    print "Used Theme       : ${theme}"
+  fi
+
+  [[ -z "${argument}" ]] && return
+
+  if [[ ! ("${argument}" == "f" || "${argument}" == "t") ]]; then
+    error "Command 'info' knows only arguments 'f' and 't'" ; return 1;
+  fi
+
+  [[ "${argument}" == "f" ]] && print
+
+  local -a searchPath=("${systemConfigDir}" "${configDir}" "$PWD")
+
+  for path in ${searchPath[@]}; do
+    local fullPath="${path}/themes"
+    [[ ! -r "${fullPath}" ]] && continue
+
+    print "Available in     : ${fullPath%/*}"
+    local themes=$(find "${fullPath}" -maxdepth 1 -type f | sort)
+    local notOk="1"
+    local i=0
+    local theme
+    c=(${txtNormal} ${tbsmColor})
+    for theme in ${themes}; do
+      ((i++))
+      print "${c[i%2]}Name             : $(sed -nr 's/[# ]*Name:[ ]*//p' ${theme}) (${theme##/*/})${txtNormal}"
+      print "${c[i%2]}Author           : $(sed -nr 's/[# ]*Author:[ ]*//p' ${theme})${txtNormal}"
+      print "${c[i%2]}Description      : $(sed -nr 's/[# ]*Description:[ ]*//p' ${theme})${txtNormal}"
+      unset notOk
+    done
+    [[ $notOk ]] && print "  <none>"
+    print
+  done
 }
 
 cmdList() {
@@ -844,6 +888,8 @@ readConfigFile
 hasOption "theme" && theme=$(parmOfOption "theme")
 if [[ -n "${theme}" ]]; then
   readConfigFile "themes/${theme}" && info "Use theme: ${theme}"
+else
+  theme="<none>"
 fi
 
 # FIXME: Do you know a way to "re-eval" strings with variables in it so we can
@@ -900,6 +946,7 @@ do
     doc)            cmdDoc                                      ; ;;
     default|d)      cmdDefault                                  ; ;;
     help|--help|h)  cmdHelp                                     ; ;;
+    info|i)         cmdInfo                                     ; ;;
     list|l)         cmdList                                     ; ;;
     menu|m)         cmdMenu                                     ; ;;
     quick-menu|qm)  cmdQMenu                                    ; ;;
