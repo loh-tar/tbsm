@@ -254,10 +254,22 @@ fillBlacklist() {
 }
 
 fillLists() {
+  local -a sessionPfads=(/usr/share/{x,wayland-}sessions)
+  local    missingSessionPfads
+  local -r warnOnly="true"
+
   setDefaultAndLast
   fillBlacklist
   clearLists "keepBlack"
-  readDesktopFiles "/usr/share/xsessions"
+
+  for pfad in ${sessionPfads[@]}; do
+    readDesktopFiles "$pfad" "$warnOnly"
+    let missingSessionPfads+="$?"
+  done
+  if [[ $missingSessionPfads -eq  ${#sessionPfads[@]} ]]; then
+    warn "${FUNCNAME[0]}: No session paths found"
+  fi
+
   readDesktopFiles "${configDir}/whitelist"
 
 #   binList+=("-")
@@ -293,6 +305,8 @@ parseDesktopFiles() {
     flag="X"
     if [[ $realLink == *"xsessions"* ]]; then
       flag="S"    # Treat all in /usr/share/xsessions as such
+    elif [[ $realLink == *"wayland-sessions"* ]]; then
+      flag="W"    # Treat all in /usr/share/wayland-sessions as such
     else
       val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Type=//p}' ${desktopFiles[${count}]})
       if [[ "${val}" == "XSession" ]]; then
@@ -313,7 +327,11 @@ parseDesktopFiles() {
       fi
       binList+=("${binItem} ${execKey#*${execKey%%[ ]*}}")
       flagList+=("${flag}")
-      nameList+=("${nameKey}")
+      if [[ "$flag" == "W" ]] && [[ " ${nameList[@]} " =~ " ${nameKey} " ]]; then
+          nameList+=("${nameKey} (Wayland)")
+      else
+          nameList+=("${nameKey}")
+      fi
       linkList+=("${realLink}")
     fi
   done
@@ -321,6 +339,7 @@ parseDesktopFiles() {
 
 readDesktopFiles() {
   local    filePfad="$1"  # e.g. /usr/share/xsessions/
+  local    warnOnly="$2"
   local -a desktopFiles
 
   if [[ -d "${filePfad}" ]]; then
@@ -330,7 +349,12 @@ readDesktopFiles() {
     desktopFiles=($(find "${filePfad}" -maxdepth 1 -regex .\*.desktop | sort))
     parseDesktopFiles
   else
-    error "${FUNCNAME[0]}: Pfad not found: ${filePfad}"
+    if [[ ${warnOnly} ]]; then
+      warn "${FUNCNAME[0]}: Path not found: ${filePfad}" "2"
+    else
+      error "${FUNCNAME[0]}: Path not found: ${filePfad}"
+    fi
+    return 1
   fi
 }
 
@@ -391,6 +415,7 @@ printMenuList() {
 runSession() {
   local -i listIndex="$1"
   local    bin=${binList[${listIndex}]}
+  local    waylandSessionArgs
 
   [[ ${listIndex} -lt 0 ]] && error "Session number too small" && return 1
   [[ ${listIndex} -gt ${#nameList[@]}-1 ]] && error "Session number too big" && return 1
@@ -403,12 +428,23 @@ runSession() {
       info "Run command: ${bin[@]}"
       ${bin[@]}
       ;;
-    S)  # Sessions
+    S)  # X Sessions
       if [[ $runInTTY ]]; then
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
         info "Not running in tty. Will not start X session." "1"
+        return 1
+      fi
+      ;;
+    W) # Wayland Sessions
+      if [[ $runInTTY ]]; then
+        [[ "${bin[@]}" =~ (^| )(/.*/)?dbus-run-session( |$) ]] ||
+        waylandSessionArgs+=$(which dbus-run-session 2> /dev/null)
+        info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}"
+        XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}
+      else
+        info "Not running in tty. Will not start Wayland session." "1"
         return 1
       fi
       ;;
@@ -824,7 +860,7 @@ fi
 # Check if running in tty and set X displaynumber
 runInTTY=$(tty)
 if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
-  info "Not running in tty. Will not start any X session."
+  info "Not running in tty. Will not start any session."
   unset runInTTY
 else
   # Replace @Xdisplay@ with e.g. :1
