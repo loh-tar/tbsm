@@ -286,7 +286,7 @@ parseDesktopFiles() {
   local flag
   local val
 
-  #TODO: allow full quoting and expansion according to desktop entry spec:
+  # TODO: allow full quoting and expansion according to desktop entry spec:
   # http://standards.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#exec-variables
 
   for ((count=0; count < ${#desktopFiles[@]}; count++)); do
