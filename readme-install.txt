@@ -1,4 +1,4 @@
-To install from source simple run:
+To install from source cd into the downloaded tree and simply run:
   sudo make install
 
 After that it may wise to run:
