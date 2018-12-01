@@ -31,6 +31,7 @@ c16c915 - Review verbosity
 =======================================
 4f68a05 - Fix: Suppress 'which' error message if no binary was found
 f90a348 - Makefile: Remove license quirk, add source quirk
+682fe14 - Fix little typo, thanks to Arda
 
 
 2016-01-19  v0.1  [YANKED]
