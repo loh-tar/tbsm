@@ -1,4 +1,4 @@
-                                                             tbsm v0.4, Oct 2017
+                                                             tbsm v0.5, Dez 2018
 Index
 =======
 1- Introduction
@@ -116,7 +116,7 @@ Last but not least: Mom & Dad and archlinux.org
 
 6- Copying
 ============
-Copyright (C) 2016 loh.tar@googlemail.com
+Copyright (C) 2016, 2017, 2018 loh.tar@googlemail.com
 
 This program is free software; you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by

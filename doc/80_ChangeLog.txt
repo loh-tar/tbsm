@@ -2,6 +2,12 @@ This file should be called, actually, 'Release Notes'. The full changelog can
 you find here: https://github.com/loh-tar/tbsm/commits/master
 
 
+2018-12-12  v0.5
+=======================================
+857fca4 - Add support for Wayland sessions
+          Thanks to Ian for this very welcome patch
+
+
 2017-10-28  v0.4
 =======================================
 682e371 - Only start X session from tty
