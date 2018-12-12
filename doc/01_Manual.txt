@@ -49,8 +49,9 @@ He only works with .desktop files to start something, there is no other
 possibility.
 
 When running tbsm without any argument he is scanning for available .desktop
-files in /usr/share/xsessions/ and $configDir/whitelist but skip any file
-referenced in $configDir/blacklist. Whereas $configDir is ~/.config/tbsm.
+files in /usr/share/xsessions/ , /usr/share/wayland-sessions and
+$configDir/whitelist but skip any file referenced in $configDir/blacklist.
+Whereas $configDir is ~/.config/tbsm.
 
 The latter will created if not exist but not filled with default files, do it
 by yourself if needed. The former will searched for themes and the config file
@@ -85,6 +86,10 @@ NOTE: Ensure you start no other display manager
 Take a look at /etc/xdg/tbsm/tbsm.conf and subfolders.
 Create your own theme files in ~/.config/tbsm/themes.
 
+By default is tbsm a little chattering (--verbose) with the intend you become
+familiar with it. But quickly you will be annoyed and therefore have all themes
+a setting verboseLevel="2" (--info) which should be good for most cases.
+
 
 4- Contact
 ============
@@ -100,6 +105,9 @@ The author of that all
 
 5- Thanks To
 ==============
+Ian Brunelli <ian@brunelli.me>
+For adding Wayland support
+
 All contributors of cdm and tdm,
 stackexchange.com, bash-hackers.org, dict.cc, google.com,
 many more I have miss to note (sorry!), but not github.com for kindly hosting.
