@@ -38,7 +38,8 @@
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
 declare -r myVersion="0.5" # Dez 2018
-declare -r myDescription="A pure bash session and application launcher"
+declare -r TEXTDOMAIN=${myName}
+declare -r myDescription=$"A pure bash session and application launcher"
 declare -r systemConfigDir="/etc/xdg/${myName}"
 declare -r configDir="${HOME}/.config/${myName}"
 declare -r installPfad=""
@@ -146,7 +147,7 @@ popListIndex() {
     pushCommand "$argument"
     return 1
   elif [[ "$argument" -gt "${#linkList[@]}" ]]; then
-    error "${FUNCNAME[-2]:3}: Selection number too big: ${argument}"
+    error "${FUNCNAME[-2]:3}: "$"Selection number too big"": ${argument}"
     return 2
   fi
 
@@ -188,7 +189,7 @@ checkConfigDir() {
   [[ -d "${configDir}" ]] && return
 
   mkdir -p "${configDir}"/{blacklist,themes,whitelist}
-  info "Created config directory: ${configDir}"
+  info $"Created config directory"": ${configDir}"
 }
 
 readConfigFile() {
@@ -221,8 +222,8 @@ readConfigFile() {
   done
 
   if (( !$ok )); then
-    error "Config file not found: ${cfgFile##*/}"
-    error "+-Searched in: ${failPath[0]%/*}/"
+    error $"Config file not found"": ${cfgFile##*/}"
+    error "+-"$"Searched in"": ${failPath[0]%/*}/"
     for path in ${failPath[@]:1}; do
       error "+------------: ${path%/*}/"
     done
@@ -267,7 +268,7 @@ fillLists() {
     let missingSessionPfads+="$?"
   done
   if [[ $missingSessionPfads -eq  ${#sessionPfads[@]} ]]; then
-    warn "${FUNCNAME[0]}: No session paths found"
+    warn "${FUNCNAME[0]}: "$"No session paths found"
   fi
 
   readDesktopFiles "${configDir}/whitelist"
@@ -276,6 +277,28 @@ fillLists() {
 #   nameList+=("Drop to Shell / Exit")
 #   flagList+=("-")
 #   linkList+=("-")
+}
+
+getLocalizatedDesktopKey() {
+  local file="$1"
+  local key="$2"
+  local val
+  # Follow spec when searching for localizated keys: lang_COUNTRY.ENCODING@MODIFIER
+  # https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#localized-keys
+  local lang
+  local country
+  local mod
+  source <(sed -e 's/^/lang=/' -e 's/_/ country=_/' -e 's/\.[[:alnum:]-]\+//' -e 's/@/ mod=@/' <<< "$LANG")
+  local spec=( "${mod:+${key}\[${lang}${country}${mod}\]}"  # Key[lang_COUNTRY@MODIFIER]
+               "${key}\[${lang}${country}\]"                # Key[lang_COUNTRY]
+               "${mod:+${key}\[${lang}${mod}\]}"            # Key[lang@MODIFIER]
+               "${key}\[${lang}\]"                          # Key[lang]
+               "$key" )                                     # Key
+
+  for k in ${spec[@]}; do
+    val=$(sed -nr "/^\[Desktop Entry\]/,/^\[/{s/^${k}=//p}" $file)
+    [[ -n "$val" ]] && printf "$val" && break
+  done
 }
 
 parseDesktopFiles() {
@@ -299,7 +322,7 @@ parseDesktopFiles() {
     # but as we are going to test the Exec key anyway, we ignore it.
     # http://stackoverflow.com/a/22550813
     execKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Exec=//p}' ${desktopFiles[${count}]})
-    nameKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Name=//p}' ${desktopFiles[${count}]})
+    nameKey=$(getLocalizatedDesktopKey ${desktopFiles[${count}]} 'Name')
     # Sadly have only the plasma.desktop file an entry with "Type=XSession", all
     # other (sorry, the few I have seen) says "Type=Application", so work around this
     flag="X"
@@ -322,7 +345,7 @@ parseDesktopFiles() {
       # If which fails to return valid path, skip to next .desktop file.
       if [[ $? != 0 ]]
         then
-        warn "Skip '$nameKey' Binary found not: ${execKey%%[ ]*}"
+        warn $"Skip '$nameKey' Binary not found"": ${execKey%%[ ]*}"
         continue
       fi
       binList+=("${binItem} ${execKey#*${execKey%%[ ]*}}")
@@ -350,9 +373,9 @@ readDesktopFiles() {
     parseDesktopFiles
   else
     if [[ ${warnOnly} ]]; then
-      warn "${FUNCNAME[0]}: Path not found: ${filePfad}" "2"
+      warn "${FUNCNAME[0]}: "$"Path not found"": ${filePfad}" "2"
     else
-      error "${FUNCNAME[0]}: Path not found: ${filePfad}"
+      error "${FUNCNAME[0]}: "$"Path not found"": ${filePfad}"
     fi
     return 1
   fi
@@ -363,7 +386,7 @@ cmdSearch() {
   local -a desktopFiles
 
   if ! popArgument; then
-    error "${FUNCNAME[0]:3} needs a pattern"
+    error "${FUNCNAME[0]:3} "$"needs a pattern"
     return 1
   fi
   pattern="$argument"
@@ -372,13 +395,13 @@ cmdSearch() {
 
   if [[ -d "${filePfad}" ]]; then
     desktopFiles=($(grep -Ril --include="*.desktop" "$pattern" "$filePfad" | sort))
-    info "Found matches: ${#desktopFiles[@]}"
+    info $"Found matches"": ${#desktopFiles[@]}"
     parseDesktopFiles
   else
-    error "${FUNCNAME[0]:3}: Pfad not found: ${filePfad}"
+    error "${FUNCNAME[0]:3}: "$"Path not found"": ${filePfad}"
   fi
 
-  print "Applications matching '$pattern'"
+  print $"Applications matching '$pattern'"
   printMenuList
 }
 
@@ -403,7 +426,7 @@ printMenuFooter() { printMenuSeparator; }
 
 printMenuList() {
   if [[ "${#nameList[@]}" == "0" ]]; then
-    print "  Nothing to list"
+    print "  "$"Nothing to list"
     return
   fi
 
@@ -417,23 +440,23 @@ runSession() {
   local    bin=${binList[${listIndex}]}
   local    waylandSessionArgs
 
-  [[ ${listIndex} -lt 0 ]] && error "Session number too small" && return 1
-  [[ ${listIndex} -gt ${#nameList[@]}-1 ]] && error "Session number too big" && return 1
+  [[ ${listIndex} -lt 0 ]] && error $"Session number too small" && return 1
+  [[ ${listIndex} -gt ${#nameList[@]}-1 ]] && error $"Session number too big" && return 1
 
-  info "Run session: ${nameList[listIndex]}"
+  info $"Run session"": ${nameList[listIndex]}"
 
   # Run $bin according to its flag.
   case ${flagList[${listIndex}]} in
     C)  # Console programs
-      info "Run command: ${bin[@]}"
+      info $"Run command"": ${bin[@]}"
       ${bin[@]}
       ;;
     S)  # X Sessions
       if [[ $runInTTY ]]; then
-        info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
+        info $"Run command"": startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
-        info "Not running in tty. Will not start X session." "0"
+        info $"Not running in tty. Will not start X session." "0"
         return 1
       fi
       ;;
@@ -441,19 +464,19 @@ runSession() {
       if [[ $runInTTY ]]; then
         [[ "${bin[@]}" =~ (^| )(/.*/)?dbus-run-session( |$) ]] ||
         waylandSessionArgs+=$(which dbus-run-session 2> /dev/null)
-        info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}"
+        info $"Run command"": XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}"
         XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}
       else
-        info "Not running in tty. Will not start Wayland session." "0"
+        info $"Not running in tty. Will not start Wayland session." "0"
         return 1
       fi
       ;;
     X)  # Applications
       if [[ $runInTTY ]]; then
-        info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
+        info $"Run command"": startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
-        info "Not running in tty, run: ${bin[@]}"
+        info $"Not running in tty, run"": ${bin[@]}"
         ${bin[@]}
       fi
       ;;
@@ -517,18 +540,18 @@ addToList() {
     esac
 
     if [[ "${linkList[${listIndex}]}" == "-" ]]; then
-      warn "Session can't ${list}ed: ${nameList[${listIndex}]}"
+      warn $"Session can't be ${list}ed"": ${nameList[${listIndex}]}"
       continue
     fi
 
     ln -sf "${linkList[${listIndex}]}" "${configDir}/${list}/"
-    info "Session ${list}ed: ${nameList[${listIndex}]}" "1"
+    info $"Session ${list}ed"": ${nameList[${listIndex}]}" "1"
     ok=1
   done
 
   if (( !$ok )) ; then
     # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
-    error "${FUNCNAME[1]:3} need a valid session number"
+    error "${FUNCNAME[1]:3} "$"needs a valid session number"
     return 1
   fi
 }
@@ -556,7 +579,7 @@ removeFromList() {
       link=("$(readlink -m ${file})")
       if [[ "${link}" == "${linkList[${listIndex}]}" ]] ; then
         unlink "$file"
-        info "Session removed from ${list}: ${nameList[${listIndex}]}" "1"
+        info $"Session removed from ${list}"": ${nameList[${listIndex}]}" "1"
       fi
     done
     ok=1
@@ -565,7 +588,7 @@ removeFromList() {
 
   if (( !$ok || $err )) ; then
     # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
-    error "${FUNCNAME[1]:3} needs a valid session number"
+    error "${FUNCNAME[1]:3} "$"needs a valid session number"
     return 1
   fi
 }
@@ -574,24 +597,24 @@ cmdBlacklist() {
   case "$1" in
     add)    addToList "blacklist"; ;;
     remove) removeFromList "blacklist"; ;;
-    *)      exitError "FATAL: Not handeld by cmdBlacklist: $1"; ;;
+    *)      exitError $"FATAL: Not handled by"" cmdBlacklist: $1"; ;;
   esac
 }
 
 cmdDefault() {
   popListIndex
   case $? in
-    1) error "Command default needs a number"; return 1; ;;
+    1) error $"Command 'default' needs a number"; return 1; ;;
     2) return 1; ;;
   esac
 
   if [[ "${linkList[${listIndex}]}" == "-" ]]; then
-    warn "Session can't saved as default: ${nameList[${listIndex}]}"
+    warn $"Session can't be saved as default"": ${nameList[${listIndex}]}"
     return
   fi
 
   ln -sf -T "${linkList[${listIndex}]}" "${configDir}/000-default-session.desktop"
-  info "New default session: ${nameList[${listIndex}]}" "1"
+  info $"New default session"": ${nameList[${listIndex}]}" "1"
   sleep 1
 }
 
@@ -604,13 +627,13 @@ cmdDoc() {
   docMatch=($(find "${docPath}" -not -type d -iname \*${argument}\* | sort))
 
   if [[ ${#docMatch[@]} -gt 1 ]]; then
-    print "Available documentation:"
+    print $"Available documentation"":"
     for doc in "${docMatch[@]}" ; do
       doc="${doc#*/??_}"
       print "  ${doc%.*}"
     done
   elif [[ -z "$docMatch" ]]; then
-      print "No manual match '${argument}'"
+      print $"No manual match '${argument}'"
   else
    less "$docMatch"
   fi
@@ -628,46 +651,46 @@ cmdHelp() {
   fi
 
   if [[ "${showFullHelp}" == "true" ]]; then
-    print "This is ${myName} (v${myVersion}) - ${myDescription}"
-    print "Usage:"
-    print "${ind}${myName} [COMMAND [argument..]] [OPTION [argument..] ..]"
+    print $"This is ${myName} (v${myVersion}) - ${myDescription}"
+    print $"Usage"":"
+    print "${ind}${myName} ["$"COMMAND"" ["$"argument""..]] ["$"OPTION"" ["$"argument""..] ..]"
     print
-    print "COMMANDs are:"
+    print $"COMMANDs are"":"
   else
-    print "Available commands:"
+    print $"Available commands"":"
   fi
-    print "${ind}blacklist, b <n..>${tab}Add/remove entries on the Blacklist. Use -b to remove"
-    print "${ind}default, d <n>${tab}Save session as the default session"
-    print "${ind}doc [pattern]${tab}${tab}List or show documentation files"
-    print "${ind}exit, X${tab}${tab}Logout from tty or quit"
+    print "${ind}blacklist, b <n..>${tab}"$"Add/remove entries on the Blacklist. Use -b to remove."
+    print "${ind}default, d <n>${tab}"$"Save session as the default session"
+    print "${ind}doc ["$"pattern""]${tab}${tab}"$"List or show documentation files"
+    print "${ind}exit, X${tab}${tab}"$"Logout from tty or quit"
   if [[ "${showFullHelp}" == "true" ]]; then
-    print "${ind}help, h${tab}${tab}You read it now"
+    print "${ind}help, h${tab}${tab}"$"You read it now"
   else
-    print "${ind}help, h${tab}${tab}You used '${argument}' so try it for some more info"
+    print "${ind}help, h${tab}${tab}"$"You used '?' so try it for some more info"
   fi
-    print "${ind}list, l [b|c|w]${tab}List entries. Current, config or black-/whitelist"
-    print "${ind}menu, m${tab}${tab}Show the full session menu"
-    print "${ind}quick-menu, qm${tab}Show the quick menu to select default or last session"
-    print "${ind}quit, q${tab}${tab}Hasta la vista, Baby!"
-    print "${ind}run, r <n>${tab}${tab}Run the given session number"
-    print "${ind}search, s <pattern>${tab}Search an application of your interest"
-    print "${ind}whitelist, w <n..>${tab}Add/remove entries on the Whitelist. Use -w to remove"
-    print "For your convenience there are some short hands: lb lc lw <n> ?"
+    print "${ind}list, l [b|c|w]${tab}"$"List entries. Current, config or black-/whitelist."
+    print "${ind}menu, m${tab}${tab}"$"Show the full session menu"
+    print "${ind}quick-menu, qm${tab}"$"Show the quick menu to select default or last session"
+    print "${ind}quit, q${tab}${tab}"$"Hasta la vista, Baby!"
+    print "${ind}run, r <n>${tab}${tab}"$"Run the given session number"
+    print "${ind}search, s <"$"pattern"">${tab}"$"Search an application of your interest"
+    print "${ind}whitelist, w <n..>${tab}"$"Add/remove entries on the Whitelist. Use -w to remove."
+    print $"For your convenience there are some short hands"": lb lc lw <n> ?"
   if [[ "${showFullHelp}" == "true" ]]; then
     print
-    print "OPTIONs are prefixed by a double hyphen, they are:"
-    print "${ind}info  ${tab}${tab}Give some feedback what is going on"
-    print "${ind}quiet ${tab}${tab}Shut up!"
-    print "${ind}silent${tab}${tab}Be reticent"
-    print "${ind}theme <name>${tab}${tab}Use given extra configuration file in <configDir>/theme/"
-    print "${ind}verbose${tab}${tab}Tell me more"
+    print $"OPTIONs are prefixed by a double hyphen, they are"":"
+    print "${ind}info  ${tab}${tab}"$"Give some feedback what is going on"
+    print "${ind}quiet ${tab}${tab}"$"Shut up!"
+    print "${ind}silent${tab}${tab}"$"Be reticent"
+    print "${ind}theme <"$"name"">${tab}${tab}"$"Use given extra configuration file in <configDir>""/theme/"
+    print "${ind}verbose${tab}${tab}"$"Tell me more"
     print
-    print "Examples:"
-    print "Run a session whose number you know"
+    print $"Examples"":"
+    print $"Run a session whose number you know"
     print "${ind}${myName} run 3"
-    print "Run with main menu and give a comprehensive feed back"
+    print $"Run with main menu and give a comprehensive feedback"
     print "${ind}${myName} --verbose"
-    print "Run with qick start menu"
+    print $"Run with quick start menu"
     print "${ind}${myName} quick-menu"
     #       print "${ind}${myName}"
     #       print "${ind}${tab}"
@@ -681,23 +704,23 @@ cmdList() {
   case "${argument}" in
     b)
       fillBlacklist
-      title="Black listed entries:"
+      title=$"Black listed entries"":"
     ;;
     c)
       fillLists
-      title="Current configuration:"
+      title=$"Current configuration"":"
     ;;
     w)
       clearLists
       readDesktopFiles "${configDir}/whitelist"
-      title="White listed entries:"
+      title=$"White listed entries"":"
     ;;
     *)
       if [[ "${#nameList[@]}" == "0" ]]; then
         pushCommand "list" "c"
         return
       else
-        title="Currently loaded list:"
+        title=$"Currently loaded list"":"
       fi
     ;;
   esac
@@ -731,7 +754,7 @@ cmdQMenu() {
 cmdRun() {
   popListIndex
   case $? in
-    1) error "Command run needs a number"; return 1; ;;
+    1) error $"Command 'run' needs a number"; return 1; ;;
     2) return 1; ;;
   esac
 
@@ -755,7 +778,7 @@ cmdWhitelist() {
   case "$1" in
     add)    addToList "whitelist"; ;;
     remove) removeFromList "whitelist"; ;;
-    *)      exitError "FATAL: Not handeld by cmdWhitelist: $1"; ;;
+    *)      exitError $"FATAL: Not handled by"" cmdWhitelist"": $1"; ;;
   esac
 }
 
@@ -843,7 +866,7 @@ find "$configDir" -type l -exec test ! -e {} \; -exec unlink {} \;
 readConfigFile
 hasOption "theme" && theme=$(parmOfOption "theme")
 if [[ -n "${theme}" ]]; then
-  readConfigFile "themes/${theme}" && info "Use theme: ${theme}"
+  readConfigFile "themes/${theme}" && info $"Use theme"": ${theme}"
 fi
 
 # FIXME: Do you know a way to "re-eval" strings with variables in it so we can
@@ -856,13 +879,13 @@ fi
 [[ -z "$menuTitle" ]]     && menuTitle="${tbsmColor}T${txtNormal}erminal ${tbsmColor}B${txtNormal}ased ${tbsmColor}S${txtNormal}ession ${tbsmColor}M${txtNormal}anager (${tbsmColor}${myName}${txtNormal} v${myVersion})"
 [[ -z "$menuSeparator" ]] && menuSeparator="--------------------------------------------"
 [[ -z "$menuPrompt" ]]    && menuPrompt="${myName}:"
-[[ -z "$menuHint" ]]      && menuHint="${tbsmColor}Hint:${txtNormal}"
-[[ -z "$quickPrompt" ]]   && quickPrompt="${myName}:${txtNormal} What's next?"
+[[ -z "$menuHint" ]]      && menuHint="${tbsmColor}"$"Hint"":${txtNormal}"
+[[ -z "$quickPrompt" ]]   && quickPrompt="${myName}:${txtNormal} "$"What's next?"
 [[ -z "$infoPrefix" ]]    && infoPrefix=" ${tbsmColor}i${txtNormal} ${myName}: "
 [[ -z "$warnPrefix" ]]    && warnPrefix=" ${colYello}W${txtNormal} ${myName}: "
 [[ -z "$errorPrefix" ]]   && errorPrefix=" ${colRed}E${txtNormal} ${myName}: "
 
-# Check if running in tty and set X displaynumber
+# Check if running in tty and set X display number
 runInTTY=$(tty)
 if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
   unset runInTTY
@@ -922,7 +945,7 @@ do
     [bw][1-9])      pushCommand ${command:0:1} ${command:1}     ; ;;
    -[bw][1-9])      pushCommand ${command:0:2} ${command:2}     ; ;;
 
-    *)              error "Unknown command: ${command}"         ; ;;
+    *)              error $"Unknown command"": ${command}"      ; ;;
   esac
 
   prompt
