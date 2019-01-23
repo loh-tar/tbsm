@@ -1,6 +1,7 @@
 DESTDIR=
 MyName=tbsm
 
+POT_FILE="locale/tbsm.pot"
 LANGS=$(notdir $(wildcard locale/*.po))
 
 all: none
@@ -29,4 +30,12 @@ uninstall:
 		rm -f ${DESTDIR}/usr/share/locale/$${lang%\.po}/LC_MESSAGES/${MyName}.mo; \
 	done
 
-.PHONY: all none install uninstall
+update-po:
+	@sed -i '/^$$/Q' ${POT_FILE}
+	@bash --dump-po-strings src/tbsm >> ${POT_FILE}
+	@msguniq --output-file=${POT_FILE} ${POT_FILE}
+	@for lang in ${LANGS}; do \
+		msgmerge --update --backup=off locale/$${lang} ${POT_FILE}; \
+	done
+
+.PHONY: all none install uninstall update-po
