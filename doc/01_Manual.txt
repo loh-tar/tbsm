@@ -69,6 +69,9 @@ files in /usr/share/applications/
 
 The first session ever started became the default session.
 
+There may some option or command variant available which is not documented. They
+are there to be more comfortable or due to the laziness of the coder.
+
 
 3- Post Install Tasks
 =======================
