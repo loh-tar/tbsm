@@ -1,0 +1,6 @@
+https://docs.kde.org/stable5/en/applications/katepart/config-variables.html
+
+kate-wildcard(Makefile): replace-tabs off; remove-trailing-spaces modified;
+kate-wildcard(*.sgml): replace-tabs on; indent-width 2; remove-trailing-spaces modified;
+kate-wildcard(*.md;*.txt): replace-tabs on; indent-width 2; remove-trailing-spaces modified;
+kate-mimetype(text/plain): replace-tabs on; indent-width 2; remove-trailing-spaces modified;
