@@ -619,10 +619,15 @@ cmdDoc() {
 cmdHelp() {
   local tab=$'\t'
   local ind="  " # indent
+  local showFullHelp="false"
 
   popArgument
 
-  if [[ "${argument}" != "short" ]]; then
+  if [[ -z "${argument}" ]]; then
+    showFullHelp="true";
+  fi
+
+  if [[ "${showFullHelp}" == "true" ]]; then
     print "This is ${myName} (v${myVersion}) - ${myDescription}"
     print "Usage:"
     print "${ind}${myName} [COMMAND [argument..]] [OPTION [argument..] ..]"
@@ -635,10 +640,10 @@ cmdHelp() {
     print "${ind}default, d <n>${tab}Save session as the default session"
     print "${ind}doc [pattern]${tab}${tab}List or show documentation files"
     print "${ind}exit, X${tab}${tab}Logout from tty or quit"
-  if [[ "${argument}" != "short" ]]; then
+  if [[ "${showFullHelp}" == "true" ]]; then
     print "${ind}help, h${tab}${tab}You read it now"
   else
-    print "${ind}help, h${tab}${tab}You used '?' so try it for some more info"
+    print "${ind}help, h${tab}${tab}You used '${argument}' so try it for some more info"
   fi
     print "${ind}list, l [b|c|w]${tab}List entries. Current, config or black-/whitelist"
     print "${ind}menu, m${tab}${tab}Show the full session menu"
@@ -648,7 +653,7 @@ cmdHelp() {
     print "${ind}search, s <pattern>${tab}Search an application of your interest"
     print "${ind}whitelist, w <n..>${tab}Add/remove entries on the Whitelist. Use -w to remove"
     print "For your convenience there are some short hands: lb lc lw <n> ?"
-  if [[ "${argument}" != "short" ]]; then
+  if [[ "${showFullHelp}" == "true" ]]; then
     print
     print "OPTIONs are prefixed by a double hyphen, they are:"
     print "${ind}info  ${tab}${tab}Give some feedback what is going on"
@@ -903,7 +908,7 @@ do
     exit|X)         cmdLogout                                   ; ;;
 
     # Short hands
-    \?|-\?|-h)      pushCommand "help" "short"                  ; ;;
+    \?|-\?|-h)      pushCommand "help" "${command}"             ; ;;
     lb)             pushCommand "list" "b"                      ; ;;
     lw)             pushCommand "list" "w"                      ; ;;
     lc)             pushCommand "list" "c"                      ; ;;
