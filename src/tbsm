@@ -872,8 +872,12 @@ else
   XserverArg=${XserverArg/@Xdisplay@/:${runInTTY#/dev/tty}}
 fi
 
+# Special handling to support GNU style help
+if [[ "${1}" == "--help" ]]; then
+  pushCommand "quit"
+  pushCommand "--help"
 # If no command given (-z) or starts with "--" show menu
-if [[ -z "${1}" || "${1}" == --* ]]; then
+elif [[ -z "${1}" || "${1}" == --* ]]; then
   pushCommand "menu"
 else
   pushCommand "quit"
@@ -896,7 +900,7 @@ do
    -blacklist|-b)   cmdBlacklist "remove"                       ; ;;
     doc)            cmdDoc                                      ; ;;
     default|d)      cmdDefault                                  ; ;;
-    help|h)         cmdHelp                                     ; ;;
+    help|--help|h)  cmdHelp                                     ; ;;
     list|l)         cmdList                                     ; ;;
     menu|m)         cmdMenu                                     ; ;;
     quick-menu|qm)  cmdQMenu                                    ; ;;
