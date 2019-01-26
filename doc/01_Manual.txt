@@ -12,7 +12,7 @@ Index
 1- Introduction
 =================
 tbsm is an application or session launcher, written in pure bash with no
-ncurses or dialog dependencies. He is inspired by cdm, tdm, in some way by
+ncurses or dialog dependencies. It is inspired by cdm, tdm, in some way by
 krunner and related.
 
 To became an overview of available options run:
