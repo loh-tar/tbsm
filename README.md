@@ -1,5 +1,5 @@
 _tbsm_ is an application or session launcher, written in pure bash with no
-ncurses or dialog dependencies. He is inspired by _cdm_, _tdm_, in some way by
+ncurses or dialog dependencies. It is inspired by _cdm_, _tdm_, in some way by
 _krunner_ and related.
 
 It was attempted to design the behavior of _tbsm_ to be as less pesky as
