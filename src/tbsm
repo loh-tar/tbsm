@@ -433,7 +433,7 @@ runSession() {
         info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
         startx ${bin[@]} -- ${XserverArg[@]}
       else
-        info "Not running in tty. Will not start X session." "1"
+        info "Not running in tty. Will not start X session." "0"
         return 1
       fi
       ;;
@@ -444,7 +444,7 @@ runSession() {
         info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}"
         XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}
       else
-        info "Not running in tty. Will not start Wayland session." "1"
+        info "Not running in tty. Will not start Wayland session." "0"
         return 1
       fi
       ;;
@@ -865,7 +865,6 @@ fi
 # Check if running in tty and set X displaynumber
 runInTTY=$(tty)
 if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
-  info "Not running in tty. Will not start any session."
   unset runInTTY
 else
   # Replace @Xdisplay@ with e.g. :1
