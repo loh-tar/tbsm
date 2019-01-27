@@ -1,0 +1,88 @@
+Contributions to tbsm
+=======================
+
+General Notes
+---------------
+Send patches in any way you like with any identity you prefer. I use only Linux
+with X/KDE/Plasma and will not test code for other systems. But I would accept
+patches for what ever system as long as it not break my box.
+
+  - Try to follow the existent look of the code
+  - There is a .kateconfig file in the source root. Should you use an other
+    editor that support .editorconfig feel free to add such file and make a PR
+  - Don't use under_scores, use camelCase
+  - Place the open brace { of a function not on an own line
+  - Don't spick the code with your copyright hints as long as you not introduce
+    some new file. If so, add my hint at the top
+  - Try to follow the existent commit message style. Avoid too long lines, use
+    imperative form, try to describe why in favor of what
+
+
+Update po/pot Files After Code Changes
+----------------------------------------
+When you are done with you patch, check if you have changed or added user
+readable strings. Only then run 'make update-po'. When your change consist of
+only one commit, add the changes of the po-files to this commit.
+
+Should your change consist of more commits add an own commit for the po-file
+changes like this:
+
+  i18n: Change-to: <your feature/patch description>
+
+
+Update Translations To Fit Code Changes
+-----------------------------------------
+Once some hacker has changed something, some translator need to care that the
+translation files are in sync with the code, meaning the translation still work.
+
+Commit the changes to some po-file like this:
+
+  i18n: <locale>-fix-to: <feature/patch description>
+  i18n: pt_BR-fix-to: <feature/patch description>
+
+Ensure that your 'fix-to:' commit match some 'Change-to:' commit, in sence of
+content and <feature/patch description>.
+
+
+Add A New Translation
+-----------------------
+Start a new translation in your favorite translation tool (poedit, gtranslator
+or whatever) using 'locale/tbsm.pot' as template.
+
+But you can also just copy the template file and modify that new file in your
+prefered editor.
+
+  cp locale/tbsm.pot locale/${LANG}.po
+
+Fill in the header and the translation lines and commit your work with the
+message:
+
+  i18n: Add <language/country> translation file
+  i18n: Add Portuguese/Brazilian translation file
+
+Feel free to translate as you like, don't try eager to be equally worded, be
+creative as long as the message of your text fit the situation.
+
+
+Some Background Info For The Noob
+-----------------------------------
+The po/pot files are composed by a series of blocks, each block being related to
+a string. E.g.:
+
+  #: src/tbsm:376 src/tbsm:378 src/tbsm:401
+  msgid "Path not found"
+  msgstr "Caminho não encontrado"
+
+The first line lists the references. It's where that string can be found on the
+source code. The second line is the string exactly as it appears on the source
+code. Third one is the translation.
+
+For detailed information on the .po file format see [1]
+For code related informations see [2]
+For available gettext tools see [3]
+For a comprehensive overview see [4]
+
+[1] https://www.gnu.org/software/gettext/manual/html_node/PO-Files.html#PO-Files
+[2] https://www.gnu.org/software/gettext/manual/html_node/sh_002dformat.html#sh_002dformat
+[3] https://www.gnu.org/software/gettext/manual/html_node/Manipulating.html#Manipulating
+[4] https://www.gnu.org/software/gettext/manual/html_node/index.html
