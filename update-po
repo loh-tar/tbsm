@@ -1,0 +1,38 @@
+#!/bin/bash
+
+declare -r potFile="locale/tbsm.pot"
+
+# TODO Add check if git is available?
+
+# This test may a little bit rigorous, but perhaps not so bad
+if [[ ! -z $(git status --porcelain -uno) ]]; then
+  git status  -uno --short
+  echo "Tree is not clear, will not check for needed string updates"
+  exit 0
+fi
+
+
+# Check if an update is needed
+# Remove everything from .pot file after first empty line => keep only the header
+sed -i '/^$/Q' ${potFile}
+# Fill with fresh data
+bash --dump-po-strings src/tbsm >> ${potFile}
+msguniq --output-file=${potFile} ${potFile}
+# Ask git if there is a change in some line starting with "msgid"
+if [[ $(git diff ${potFile} | grep -c "[+-]msgid") -lt 1 ]]; then
+  echo "Nothing todo"
+  # Undo our change on the .pot file
+  git checkout ${potFile}
+  exit 0
+fi
+
+# Update each existing .po file
+for lang in $(find locale/ -iname *.po); do
+  echo -n ${lang}
+  msgmerge --no-wrap --update --backup=off ${lang} ${potFile}
+done
+
+# TODO Either auto commit or at least set .git/COMMIT_EDITMSG and call "git commit"
+#      For this we could grep/cut the last message and set .git/COMMIT_EDITMSG to
+#
+#      i18n: Change-to: $(result from grep/cut)

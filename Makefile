@@ -31,11 +31,6 @@ uninstall:
 	done
 
 update-po:
-	@sed -i '/^$$/Q' ${POT_FILE}
-	@bash --dump-po-strings src/tbsm >> ${POT_FILE}
-	@msguniq --output-file=${POT_FILE} ${POT_FILE}
-	@for lang in ${LANGS}; do \
-		msgmerge --update --backup=off locale/$${lang} ${POT_FILE}; \
-	done
+	@./update-po
 
 .PHONY: all none install uninstall update-po
