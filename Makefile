@@ -31,6 +31,20 @@ uninstall:
 	done
 
 update-po:
-	@./update-po
+	@cp ${POT_FILE} /tmp/tbsm.pot
+	@sed -i '/^$$/Q' /tmp/tbsm.pot
+	@bash --dump-po-strings src/tbsm >> /tmp/tbsm.pot
+	@msguniq --output-file=/tmp/tbsm.pot /tmp/tbsm.pot
+	@if ! bash -c "diff -u -B -q <(grep -o '^[^#]*' /tmp/tbsm.pot) <(grep -o '^[^#]*' ${POT_FILE})" &> /dev/null; then \
+		cp /tmp/tbsm.pot ${POT_FILE} && \
+		echo "Updated ${POT_FILE}"; \
+		for lang in ${LANGS}; do \
+			msgmerge --quiet --update --backup=off locale/$${lang} ${POT_FILE} && \
+			echo "Merged changes into locale/$${lang}"; \
+		done; \
+	else \
+		echo "No string changes. Skipping update."; \
+	fi
+	@rm /tmp/tbsm.pot
 
 .PHONY: all none install uninstall update-po
