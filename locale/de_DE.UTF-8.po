@@ -1,0 +1,310 @@
+# de/DE translation for tbsm
+#
+# tbsm: Terminal Based Session Manager
+# Copyright (C) 2016-2019 loh.tar@googlemail.com
+#
+# This file is distributed under the same license as the tbsm package
+#
+# loh.tar, 2019
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: tbsm 0.5\n"
+"Report-Msgid-Bugs-To: ian@brunelli.me\n"
+"POT-Creation-Date: 2018-12-20 08:22-0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/tbsm:42
+msgid "A pure bash session and application launcher"
+msgstr "Ein Sitzungs- und Anwendungensstarter in Bash"
+
+#: src/tbsm:150
+msgid "Selection number too big"
+msgstr "Gewählte Nummer ist zu groß"
+
+#: src/tbsm:192
+msgid "Created config directory"
+msgstr "Konfigurationsverzeichnis erstellt"
+
+#: src/tbsm:225
+msgid "Config file not found"
+msgstr "Konfigurationsdatei nicht gefunden"
+
+#: src/tbsm:226
+msgid "Searched in"
+msgstr "Suchte in"
+
+#: src/tbsm:271
+msgid "No session paths found"
+msgstr "Keine Sitzungspfade gefunden"
+
+#: src/tbsm:348
+msgid "Skip '$nameKey' Binary not found"
+msgstr "Überspringe '$nameKey' Program nicht gefunden"
+
+#: src/tbsm:376 src/tbsm:378 src/tbsm:401
+msgid "Path not found"
+msgstr "Pfad nicht gefunden"
+
+#: src/tbsm:389
+msgid "needs a pattern"
+msgstr "benötigt ein Muster"
+
+#: src/tbsm:398
+msgid "Found matches"
+msgstr "Gefunene Treffer"
+
+#: src/tbsm:404
+msgid "Applications matching '$pattern'"
+msgstr "Anwendungen passed zu '$pattern'"
+
+#: src/tbsm:429
+msgid "Nothing to list"
+msgstr "Nichts da zum Anzeigen"
+
+#: src/tbsm:443
+msgid "Session number too small"
+msgstr "Sitzungsnummer zu klein"
+
+#: src/tbsm:444
+msgid "Session number too big"
+msgstr "Sitzungsnummer zu groß"
+
+#: src/tbsm:446
+msgid "Run session"
+msgstr ""
+
+#: src/tbsm:451 src/tbsm:456 src/tbsm:467 src/tbsm:476
+msgid "Run command"
+msgstr "Starte Befehl"
+
+#: src/tbsm:459
+msgid "Not running in tty. Will not start X session."
+msgstr ""
+
+#: src/tbsm:470
+msgid "Not running in tty. Will not start Wayland session."
+msgstr ""
+
+#: src/tbsm:479
+msgid "Not running in tty, run"
+msgstr ""
+
+#: src/tbsm:543
+msgid "Session can't be ${list}ed"
+msgstr "Sitzung kann nich ${list}ed werden"
+
+#: src/tbsm:548
+msgid "Session ${list}ed"
+msgstr "Sitzung '${list}ed'"
+
+#: src/tbsm:554 src/tbsm:591
+msgid "needs a valid session number"
+msgstr "benötigt eine gültige Sitzungnummer"
+
+#: src/tbsm:582
+msgid "Session removed from ${list}"
+msgstr "Sitzung von '${list}' entfernt"
+
+#: src/tbsm:600 src/tbsm:781
+msgid "FATAL: Not handled by"
+# Never translate FATAL messages
+msgstr ""
+
+#: src/tbsm:607
+msgid "Command 'default' needs a number"
+msgstr "Befehl 'default' benötigt eine Zahl"
+
+#: src/tbsm:612
+msgid "Session can't be saved as default"
+msgstr "Sitzung kann nicht als die Bevorzugte gespeichert werden"
+
+#: src/tbsm:617
+msgid "New default session"
+msgstr "Neue Bevorzugte Sitzung"
+
+#: src/tbsm:630
+msgid "Available documentation"
+msgstr "Verfügbare Dokumentationen"
+
+#: src/tbsm:636
+msgid "No manual match '${argument}'"
+msgstr "Keine Dokumentation passt zu '${argument}'"
+
+#: src/tbsm:654
+msgid "This is ${myName} (v${myVersion}) - ${myDescription}"
+msgstr "Das ist ${myName} (v${myVersion}) - ${myDescription}"
+
+#: src/tbsm:655
+msgid "Usage"
+msgstr "Aufruf"
+
+#: src/tbsm:656
+msgid "COMMAND"
+msgstr "BEFEHL"
+
+#: src/tbsm:656
+msgid "argument"
+msgstr "Argument"
+
+#: src/tbsm:656
+msgid "OPTION"
+msgstr "OPTION"
+
+#: src/tbsm:658
+msgid "COMMANDs are"
+msgstr "BEFEHLe sind"
+
+#: src/tbsm:660
+msgid "Available commands"
+msgstr "Verfügbare Befehle"
+
+#: src/tbsm:662
+msgid "Add/remove entries on the Blacklist. Use -b to remove."
+msgstr "Hinzufügen (b) oder Entfernen (-b) zu/von der Blacklist"
+
+#: src/tbsm:663
+msgid "Save session as the default session"
+msgstr "Speichert die Sitzung als die Bevorzugte"
+
+#: src/tbsm:664 src/tbsm:676
+msgid "pattern"
+msgstr "Muster"
+
+#: src/tbsm:664
+msgid "List or show documentation files"
+msgstr "Zeigt eine Liste der Dokumentationen oder die Datei"
+
+#: src/tbsm:665
+msgid "Logout from tty or quit"
+msgstr "Beende tbsm, Wenn im tty wird auch ausgeloggt"
+
+#: src/tbsm:667
+msgid "You read it now"
+msgstr "Sie lesen es gerade"
+
+#: src/tbsm:669
+msgid "You used '?' so try it for some more info"
+msgstr "Sie verwendeten '?', so bekommen Sie mehr Informationen"
+
+#: src/tbsm:671
+msgid "List entries. Current, config or black-/whitelist."
+msgstr "Zeige Einträge. Aktuelle, Konfiguration oder von Black-/Whitelist"
+
+#: src/tbsm:672
+msgid "Show the full session menu"
+msgstr "Zeige das Hauptmenü"
+
+#: src/tbsm:673
+msgid "Show the quick menu to select default or last session"
+msgstr "Zeige das Schnellstart-Menü mit der bevorzugten und der letzten Sitzung"
+
+#: src/tbsm:674
+msgid "Hasta la vista, Baby!"
+msgstr "Und Tschüss!"
+
+#: src/tbsm:675
+msgid "Run the given session number"
+msgstr "Starte die angegebene Sitzung"
+
+#: src/tbsm:676
+msgid "Search an application of your interest"
+msgstr "Suche nach einer Anwenung mit einem <Muster>"
+
+#: src/tbsm:677
+msgid "Add/remove entries on the Whitelist. Use -w to remove."
+msgstr "Hinzufügen (w) oder Entfernen (-w) zu/von der Whitelist"
+
+#: src/tbsm:678
+msgid "For your convenience there are some short hands"
+msgstr "Zu Ihrer Bequemlichkeit gibt es einige Abkürzungen"
+
+#: src/tbsm:681
+msgid "OPTIONs are prefixed by a double hyphen, they are"
+msgstr "OPTIONen beginnen mit einem doppelten minus Zeichen, es gibt"
+
+#: src/tbsm:682
+msgid "Give some feedback what is going on"
+msgstr "Gebe nützliche Hinweise"
+
+#: src/tbsm:683
+msgid "Shut up!"
+msgstr "Gebe keinerlei Rückmelung"
+
+#: src/tbsm:684
+msgid "Be reticent"
+msgstr "Vermeide unnötige Informationen"
+
+#: src/tbsm:685
+msgid "name"
+msgstr "Name"
+
+#: src/tbsm:685
+msgid "Use given extra configuration file in <configDir>"
+msgstr "Verwende spezielle Themen-Datei in <configDir>"
+
+#: src/tbsm:686
+msgid "Tell me more"
+msgstr "Berichte ausführlich was passiert"
+
+#: src/tbsm:688
+msgid "Examples"
+msgstr "Beispiele"
+
+#: src/tbsm:689
+msgid "Run a session whose number you know"
+msgstr "Starten einer Sizung deren Nummer Sie kennen"
+
+#: src/tbsm:691
+msgid "Run with main menu and give a comprehensive feedback"
+msgstr "Starte mit dem Hauptmenü und gebe umfassend Auskunft was geschieht"
+
+#: src/tbsm:693
+msgid "Run with quick start menu"
+msgstr "Starte mit dem Schnellstart-Menü"
+
+#: src/tbsm:707
+msgid "Black listed entries"
+msgstr "Inhalt der Blacklist"
+
+#: src/tbsm:711
+msgid "Current configuration"
+msgstr "Momentane Konfiguration"
+
+#: src/tbsm:716
+msgid "White listed entries"
+msgstr "Inhalt der Whitelist"
+
+#: src/tbsm:723
+msgid "Currently loaded list"
+msgstr "Momentan geladene Liste"
+
+#: src/tbsm:757
+msgid "Command 'run' needs a number"
+msgstr "Befehl 'run' benötigt eine Zahl"
+
+#: src/tbsm:869
+msgid "Use theme"
+msgstr "Verwende Thema"
+
+#: src/tbsm:882
+msgid "Hint"
+msgstr "Hinweis"
+
+#: src/tbsm:883
+msgid "What's next?"
+msgstr "Was jetzt?"
+
+#: src/tbsm:948
+msgid "Unknown command"
+msgstr "Unbekannter Befehl"
+
+#~ msgid "Not running in tty. Will not start any session."
+#~ msgstr "Werde keine Sitzung ausserhalb eines tty starten."
