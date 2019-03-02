@@ -65,7 +65,8 @@ append to the end something like:
     # Auto start tbsm after login on first two VTs
     [[ $XDG_VTNR -le 2 ]] && tbsm
 
-NOTE: Ensure you start no other display manager
+NOTE: Ensure you start no other display manager. Check your distribution's
+documentation how to disable system services or uninstall packages.
 
 And it may wise to run:
 
