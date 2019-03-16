@@ -97,6 +97,8 @@ a setting verboseLevel="2" (--info) which should be good for most cases.
 
 4- Tips & Tricks
 ==================
+Here are some hints collected in order as they was reported. Should that list
+grow in the future I should better enable the Wiki feature on GitHub.
 
 4-1- tbsm together with tmux
 ------------------------------
@@ -107,6 +109,20 @@ session. To solve this try the following:
   if [[ ! ${DISPLAY} && ${XDG_VTNR} == 1 ]]; then
       exec tbsm
   fi
+
+Thanks to Anton, https://github.com/loh-tar/tbsm/issues/10
+
+
+4-2- tbsm together with fish shell
+------------------------------------
+Add to .config/fish/config.fish
+
+  if test "$DISPLAY" = "" -a "$XDG_VTNR" = 1
+        tbsm
+  end
+
+If $DISPLAY is empty and XDG_VTR equals 1 then execute tbsm.
+Works with tmux. Test in sway, alacritty.
 
 Thanks to Anton, https://github.com/loh-tar/tbsm/issues/10
 
