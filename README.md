@@ -49,9 +49,12 @@ Arch users find it in [AUR](https://aur.archlinux.org/packages/tbsm/)
 
 #### From Source
 
-_cd_ into the downloaded source tree and simply run:
+In most cases simply _cd_ into the downloaded source tree and run:
 
     sudo make install
+
+However, should you be on a non GNU system, or using a somehow special
+distribution which only has a BusyBox, please [see here.](https://github.com/loh-tar/tbsm/issues/9)
 
 To remove, which you will of cause never do, run:
 
