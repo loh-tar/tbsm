@@ -66,7 +66,7 @@ To auto start _tbsm_ after login edit your _~/.bash_profile_, or similar, and
 append to the end something like:
 
     # Auto start tbsm after login on first two VTs
-    [[ $XDG_VTNR -le 2 ]] && tbsm
+    [[ $XDG_VTNR -le 2 ]] && exec tbsm
 
 NOTE: Ensure you start no other display manager. Check your distribution's
 documentation how to disable system services or uninstall packages.
