@@ -39,8 +39,17 @@ declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
 declare -r myVersion="0.5" # Dez 2018
 declare -r myDescription="A pure bash session and application launcher"
-declare -r systemConfigDir="/etc/xdg/${myName}"
-declare -r configDir="${HOME}/.config/${myName}"
+# enumerate XDG config dirs in reverse order
+declare -a systemConfigDirs
+OIFS="$IFS"
+IFS=":"
+for DIR in ${XDG_CONFIG_DIRS:-/etc/xdg}
+do
+  systemConfigDirs=("${DIR}/${myName}" "${systemConfigDirs[@]}")
+done
+IFS="$OIFS"
+declare -r systemConfigDirs=( "${systemConfigDirs[@]}" )
+declare -r configDir="${XDG_CONFIG_HOME:-${HOME}/.config}/${myName}"
 declare -r installPfad=""
 declare    runInTTY="yes"         # When unset we have no tty, glas is half full
 declare    XserverArg="@Xdisplay@ -nolisten tcp"  # @Xdisplay@ will replaced by number of tty
@@ -193,7 +202,7 @@ checkConfigDir() {
 
 readConfigFile() {
   local    cfgFile="${1:-${myName}.conf}"
-  local -a searchPath=("${systemConfigDir}" "${configDir}" "$PWD")
+  local -a searchPath=("${systemConfigDirs[@]}" "${configDir}" "$PWD")
   local -a failPath=()
   local -i ok=0
 
