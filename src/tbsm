@@ -42,6 +42,7 @@ declare -r myDescription="A pure bash session and application launcher"
 declare -r systemConfigDir="/etc/xdg/${myName}"
 declare -r configDir="${HOME}/.config/${myName}"
 declare -r installPfad=""
+declare -a sessionPfads=(/usr/share/{x,wayland-}sessions)
 declare    runInTTY="yes"         # When unset we have no tty, glas is half full
 declare    XserverArg="@Xdisplay@ -nolisten tcp"  # @Xdisplay@ will replaced by number of tty
 declare    protectedVerbose
@@ -254,7 +255,6 @@ fillBlacklist() {
 }
 
 fillLists() {
-  local -a sessionPfads=(/usr/share/{x,wayland-}sessions)
   local    missingSessionPfads
   local -r warnOnly="true"
 
