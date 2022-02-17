@@ -198,7 +198,8 @@ exitCancel() { error "$*"; exit 2; }
 checkConfigDir() {
   [[ -d "${configDir}" ]] && return
 
-  mkdir -p "${configDir}"/{blacklist,themes,whitelist}
+  mkdir -p "${configDir}"/{blacklist,themes,whitelist} 2>/dev/null
+  [[ $? != 0 ]] && exitError "Can't create my config dir: ${configDir}"
   info "Created config directory: ${configDir}"
 }
 
