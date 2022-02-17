@@ -62,19 +62,10 @@ To remove, which you will of cause never do, run:
 
 ### Post Install Tasks
 
-To auto start _tbsm_ after login edit your _~/.bash_profile_, or similar, and
-append to the end something like:
-
-    # Auto start tbsm after login on first two VTs
-    [[ $XDG_VTNR -le 2 ]] && tbsm
-
-NOTE: Ensure you start no other display manager. Check your distribution's
-documentation how to disable system services or uninstall packages.
-
-And it may wise to run:
+Read the [manual](https://github.com/loh-tar/tbsm/blob/master/doc/01_Manual.txt),
+section 3- and 4- how to autostart and configure tbsm, by running:
 
     tbsm doc man
-    tbsm help
 
 ### License
 
