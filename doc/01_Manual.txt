@@ -81,6 +81,9 @@ to the end something like:
   # Auto start tbsm after login on first two VTs
   [[ $XDG_VTNR -le 2 ]] && tbsm
 
+This is only an suggestion, there may better ways. Look at section 4- how others
+configured there system.
+
 NOTE: Ensure you start no other display manager. Check your distribution's
       documentation how to disable system services or uninstall packages.
 
@@ -125,6 +128,16 @@ If $DISPLAY is empty and XDG_VTR equals 1 then execute tbsm.
 Works with tmux. Test in sway, alacritty.
 
 Thanks to Anton, https://github.com/loh-tar/tbsm/issues/10
+
+
+4-3- Prevent exiting out of twm for example
+---------------------------------------------
+Instead of just calling tbsm, "exec" it similar to 4-1-
+
+  # Auto start tbsm after login on first two VTs
+  [[ $XDG_VTNR -le 2 ]] && exec tbsm
+
+Thanks to toke, https://github.com/loh-tar/tbsm/pull/12
 
 
 5- Contact
