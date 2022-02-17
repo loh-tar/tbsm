@@ -82,7 +82,7 @@ to the end something like:
   [[ $XDG_VTNR -le 2 ]] && tbsm
 
 This is only an suggestion, there may better ways. Look at section 4- how others
-configured there system.
+configured their system.
 
 NOTE: Ensure you start no other display manager. Check your distribution's
       documentation how to disable system services or uninstall packages.
@@ -145,7 +145,7 @@ Thanks to toke, https://github.com/loh-tar/tbsm/pull/12
 
   [[ -n "$XDG_VTNR" && $XDG_VTNR -le 2 ]] && tbsm
 
-Thanks to 0BAD-C0DE https://aur.archlinux.org/packages/tbsm#comment-841043
+Thanks to 0BAD-C0DE, https://aur.archlinux.org/packages/tbsm#comment-841043
 
 
 5- Contact
