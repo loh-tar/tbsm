@@ -140,6 +140,14 @@ Instead of just calling tbsm, "exec" it similar to 4-1-
 Thanks to toke, https://github.com/loh-tar/tbsm/pull/12
 
 
+4-4- To avoid trouble when also SSH access is needed
+------------------------------------------------------
+
+  [[ -n "$XDG_VTNR" && $XDG_VTNR -le 2 ]] && tbsm
+
+Thanks to 0BAD-C0DE https://aur.archlinux.org/packages/tbsm#comment-841043
+
+
 5- Contact
 ============
 The home of tbsm
