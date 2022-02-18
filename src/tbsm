@@ -222,15 +222,17 @@ readConfigFile() {
     usedPath=("${usedPath[@]}" "${fullPath}")
 
     # http://stackoverflow.com/a/20815951
+    local -i lineNo=0
     while IFS='= ' read lhs rhs
     do
+      (( ++lineNo ))
       if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
         rhs="${rhs%%\#*}"             # Del in line right comments
         rhs="${rhs%"${rhs##*[^ ]}"}"  # Del trailing spaces
 
         # Without eval does it not works as intended. Because we want use
         # already known variables in config files too.
-        declare -g $lhs="$(eval "echo $rhs")"
+        declare -g $lhs="$(eval "echo $rhs")" || exitError "Bad config in file: ${fullPath} line: ${lineNo}"
       fi
     done < "${fullPath}"
 
