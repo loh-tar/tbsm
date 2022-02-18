@@ -207,8 +207,11 @@ readConfigFile() {
   local    cfgFile="${1:-${myName}.conf}"
   local -a searchPath=("${systemConfigDirs[@]}" "${configDir}" "$PWD")
   local -a failPath=()
+  local -a usedPath=()
   local -i ok=0
 
+  # Hint: We can't print information about success/fail in this loop and respect
+  # at the same time some verbose level. That why we collect data and print later
   for path in ${searchPath[@]}; do
     local fullPath="${path}/${cfgFile}"
     if [[ ! -r "${fullPath}" ]]; then
@@ -216,6 +219,7 @@ readConfigFile() {
       continue;
     fi
     ok=1
+    usedPath=("${usedPath[@]}" "${fullPath}")
 
     # http://stackoverflow.com/a/20815951
     while IFS='= ' read lhs rhs
@@ -233,7 +237,7 @@ readConfigFile() {
   done
 
   if (( !$ok )); then
-    error "Config file not found: ${cfgFile##*/}"
+    error "No config file '${cfgFile##*/}' found"
     error "+-Searched in: ${failPath[0]%/*}/"
     for path in ${failPath[@]:1}; do
       error "+------------: ${path%/*}/"
@@ -241,7 +245,18 @@ readConfigFile() {
     return 1
   fi
 
+  # Restore verbose level given on command line, if some
   [[ -n "${protectedVerbose}" ]] && verboseLevel=("${protectedVerbose}")
+
+  if [[ ${verboseLevel} -gt "2" ]] ; then
+    info "Searched for config file(s) '${cfgFile##*/}' in ..."
+    for path in ${failPath[@]}; do
+      info "- Nothing in: ${path%/*}/"
+    done
+    for path in ${usedPath[@]}; do
+      info "+ Utilized  : ${path}"
+    done
+  fi
 }
 
 clearLists() {
@@ -855,7 +870,8 @@ find "$configDir" -type l -exec test ! -e {} \; -exec unlink {} \;
 readConfigFile
 hasOption "theme" && theme=$(parmOfOption "theme")
 if [[ -n "${theme}" ]]; then
-  readConfigFile "themes/${theme}" && info "Use theme: ${theme}"
+  info "Use theme: ${theme}"
+  readConfigFile "themes/${theme}"
 fi
 
 # FIXME: Do you know a way to "re-eval" strings with variables in it so we can
