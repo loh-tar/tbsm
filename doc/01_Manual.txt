@@ -48,6 +48,9 @@ May you have a nice day, I run now 'q'
 He only works with .desktop files to start something, there is no other
 possibility.
 
+The following statements assume a usual configuration. However there will
+XDG_CONFIG_HOME and XDG_CONFIG_DIRS respected.
+
 When running tbsm without any argument he is scanning for available .desktop
 files in /usr/share/xsessions/ , /usr/share/wayland-sessions and
 $configDir/whitelist but skip any file referenced in $configDir/blacklist.
