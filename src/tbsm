@@ -41,14 +41,16 @@ declare -r myVersion="0.5" # Dez 2018
 declare -r myDescription="A pure bash session and application launcher"
 
 # Let's support XDG Base Directory Specification
-# Line up the config dirs in reverse order
-declare -a systemConfigDirs
+declare -a systemConfigDirs # Line up in reverse order to apply config files
+declare -a sessionStartDirs # Line up in normal order to find first configured file
 oldIFS="$IFS"; IFS=":"
 for DIR in ${XDG_CONFIG_DIRS:-/etc/xdg} ; do
   systemConfigDirs=("${DIR}/${myName}" "${systemConfigDirs[@]}")
+  sessionStartDirs=("${sessionStartDirs[@]}" "${DIR}/${myName}")
 done
 IFS="$oldIFS"
 declare -r systemConfigDirs=( "${systemConfigDirs[@]}" )
+declare -r sessionStartDirs=( "${sessionStartDirs[@]}" )
 declare -r configDir="${XDG_CONFIG_HOME:-${HOME}/.config}/${myName}"
 
 declare -r installPfad=""
@@ -214,6 +216,7 @@ readConfigFile() {
   # at the same time some verbose level. That why we collect data and print later
   for path in ${searchPath[@]}; do
     local fullPath="${path}/${cfgFile}"
+    echo "Check: ${fullPath}"
     if [[ ! -r "${fullPath}" ]]; then
       failPath=("${failPath[@]}" "${fullPath}")
       continue;
@@ -459,8 +462,7 @@ runSession() {
       ;;
     S)  # X Sessions
       if [[ $runInTTY ]]; then
-        info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
-        startx ${bin[@]} -- ${XserverArg[@]}
+        runXSession "${bin[@]}"
       else
         info "Not running in tty. Will not start X session." "0"
         return 1
@@ -479,8 +481,7 @@ runSession() {
       ;;
     X)  # Applications
       if [[ $runInTTY ]]; then
-        info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
-        startx ${bin[@]} -- ${XserverArg[@]}
+        runXSession "${bin[@]}"
       else
         info "Not running in tty, run: ${bin[@]}"
         ${bin[@]}
@@ -499,6 +500,24 @@ runSession() {
     then pushCommand ${command}
     else pushCommand "menu"
   fi
+}
+
+runXSession() {
+  # Has the user configured some custom start X file?
+  local -a searchPath=("${configDir}" "${sessionStartDirs[@]}")
+  for path in ${searchPath[@]}; do
+    local startFile="${path}/start-x"
+    if [[ -f "${startFile}" ]]; then
+      info "Start X by ${startFile}"
+      source "${startFile}"
+      return
+    fi
+    info "No ${startFile}"
+  done
+
+  # No special start file found, use the build in
+  info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
+  startx ${bin[@]} -- ${XserverArg[@]}
 }
 
 showQuickMenu() {

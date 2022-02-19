@@ -101,6 +101,22 @@ familiar with it. But quickly you will be annoyed and therefore have all themes
 a setting verboseLevel="2" (--info) which should be good for most cases.
 
 
+3-2- Special Start X Configuration
+------------------------------------
+By default will X started this way:
+
+  startx ${bin[@]} -- ${XserverArg[@]}
+
+If that doesn't full fill your needs, you can create an own startup file in one
+of the config directories. It must be named "start-x" and will be "sourced"
+instead of the noted build in command. Here the simplest possible an example:
+
+  $ cat ~/.config/tbsm/start-x
+  # do something before
+  startx ${bin[@]} -- ${XserverArg[@]}
+  # do something after
+
+
 4- Tips & Tricks
 ==================
 Here are some hints collected in order as they was reported. Should that list
