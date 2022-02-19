@@ -101,6 +101,27 @@ familiar with it. But quickly you will be annoyed and therefore have all themes
 a setting verboseLevel="2" (--info) which should be good for most cases.
 
 
+3-2- Special Start X Configuration
+------------------------------------
+By default will X started this way:
+
+  startx ${bin[@]} -- ${XserverArg[@]}
+
+If that doesn't full fill your needs, you can create an own startup file in one
+of the config directories. It must be named "start-x" and will be called with
+the three shown arguments, but quoted. As the file is called, it must be
+executable. Here the simplest possible example:
+
+  $ cat ~/.config/tbsm/start-x
+  #!/bin/bash
+  # $@ contains: $1="${bin[@]}"  $2="--"  $3="${XserverArg[@]}"
+  # do something before
+  startx $@
+  # do something after
+
+For a little more complex example see 4-5-
+
+
 4- Tips & Tricks
 ==================
 Here are some hints collected in order as they was reported. Should that list
@@ -149,6 +170,22 @@ Thanks to toke, https://github.com/loh-tar/tbsm/pull/12
   [[ -n "$XDG_VTNR" && $XDG_VTNR -le 2 ]] && tbsm
 
 Thanks to 0BAD-C0DE, https://aur.archlinux.org/packages/tbsm#comment-841043
+
+
+4-5- Redirect Xorg output into custom logfile
+-----------------------------------------------
+With this redirection will the terminal not fluted with unreadable chatter from
+the X server or the session. Interesting read! Of cause you can also dump it by
+redirect to /dev/null
+
+  $ cat ~/.config/tbsm/start-x
+  #!/bin/bash
+  ownLogfile="/tmp/$USER/tbsm/xorg-chatter.log"
+  mkdir -p $(dirname $ownLogfile)
+  # We also set an option to improve readability on high resolution displays in
+  # a slightly strange way. Typical we would set XserverArg in the conf file
+  # Just remember: $@ is like "${bin[@]} -- ${XserverArg[@]}"
+  startx $@ -dpi 120 2> ${ownLogfile}
 
 
 5- Contact
