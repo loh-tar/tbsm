@@ -9,14 +9,22 @@ Furthermore is there the possibility to customize his look by themes.
 
 Supports _Xorg_ as well as _Wayland_ sessions.
 
-### Last version is 0.5, released Dez 2018
+### Last version is 0.6, Feb 2022
 
 #### Release Notes
 
-    857fca4 - Add support for Wayland sessions
-              Thanks to Ian for this very welcome patch
+    031c2a3 - Makefile: Add new target 'update' !!!
+    e7cc113 - Manual: Add Tips&Tricks section
+              Thanks to all who gave a hint
+    afdb675 - Allow configuration of session search paths by conf file
+              Thanks to Douglas
+    54b0c57 - Support XDG Base Directory Specification
+              Thanks to Vladimir
+    0f04aa3 - Exit on error in config file. Prior was such an error ignored
+    53d339e - Improved user information in verbose mode - 1a4d9f1
+    a6e7bcb - Add new doc file ReleaseNotes, rename ChangeLog to ReleaseLog
 
-Older release notes [are here](https://raw.githubusercontent.com/loh-tar/tbsm/master/doc/80_ChangeLog.txt).
+Older release notes [are here](https://raw.githubusercontent.com/loh-tar/tbsm/master/doc/81_ReleaseLog.txt).
 
 The full changelog [is there](https://github.com/loh-tar/tbsm/commits/master).
 
@@ -62,16 +70,14 @@ provided by dedicated users.
 
 In most cases simply _cd_ into the downloaded source tree and run:
 
-    sudo make install
+    make
+
+Read what is offered and run the command of your choice with root-power.
 
 However, should you be on a non GNU system, or using a somehow special
 distribution which only has a BusyBox, please [see here.](https://github.com/loh-tar/tbsm/issues/9)
 
-To remove, which you will of cause never do, run:
-
-    sudo make uninstall
-
-### Post Install Tasks
+#### Post Install Tasks
 
 Read the [manual](https://github.com/loh-tar/tbsm/blob/master/doc/01_Manual.txt),
 section 3- and 4- how to autostart and configure tbsm, by running:
