@@ -75,6 +75,10 @@ The first session ever started became the default session.
 There may some option or command variant available which is not documented. They
 are there to be more comfortable or due to the laziness of the coder.
 
+With version v0.6 of tbsm it was decided that tbsm will never have an internal
+variable starting with 'own'. So you are always save to use 'ownFoo' in your
+custom session startup script. See 4-5- as an example.
+
 
 3- Post Install Tasks
 =======================
@@ -115,6 +119,8 @@ instead of the noted build in command. Here the simplest possible an example:
   # do something before
   startx ${bin[@]} -- ${XserverArg[@]}
   # do something after
+
+For a little more complex example see 4-5-
 
 
 4- Tips & Tricks
@@ -165,6 +171,23 @@ Thanks to toke, https://github.com/loh-tar/tbsm/pull/12
   [[ -n "$XDG_VTNR" && $XDG_VTNR -le 2 ]] && tbsm
 
 Thanks to 0BAD-C0DE, https://aur.archlinux.org/packages/tbsm#comment-841043
+
+
+4-5- Redirect Xorg output into custom logfile
+-----------------------------------------------
+With this redirection will the terminal not fluted with unreadable chatter from
+the X server or the session. Interesting read! Of cause you can also dump it by
+redirect to /dev/null
+
+  $ cat ~/.config/tbsm/start-x
+  # tbsm will never have a variable starting with 'own'
+  ownLogfile="/tmp/$USER/tbsm/xorg-chatter.log"
+  mkdir -p $(dirname $ownLogfile)
+  # 'info' is one of tbsm's own functions
+  info "Xorg messages will directed to: $ownLogfile" 2 # 2=loglevel, try 1
+  # We also set an option to improve readability on high resolution displays in
+  # a slightly strange way. Typical we would set XserverArg in the conf file
+  startx ${bin[@]} -- ${XserverArg[@]} -dpi 120 2> ${ownLogfile}
 
 
 5- Contact

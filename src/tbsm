@@ -35,6 +35,12 @@
 # TODO
 #   Consider http://wiki.bash-hackers.org/howto/collapsing_functions
 
+# NOTE NEVER EVER CREATE A VARIABLE STARTING WITH 'own' !!!
+#      Since v0.6 we support custom session startup scripts. We like to give the
+#      user some 'name-space' where he is save not to accidentally overwrite
+#      some tbsm internal variable. 'my' may a better choice, but glaringly is that
+#      option already taken.
+
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
 declare -r myVersion="0.5" # Dez 2018
