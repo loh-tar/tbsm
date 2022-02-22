@@ -165,12 +165,22 @@ The author of that all
 
 6- Thanks To
 ==============
-Ian Brunelli <ian@brunelli.me>
-For adding Wayland support
+Ian Brunelli <ian@brunelli.me>,
+  not only for adding Wayland support
+
+Jan-Luca <build.opensuse.org/users/jlkDE>,
+  for providing an openSUSE package
 
 All contributors of cdm and tdm,
-stackexchange.com, bash-hackers.org, dict.cc, google.com,
-many more I have miss to note (sorry!), but not github.com for kindly hosting.
+  without which I probably would not have started tbsm in the first place
+
+stackexchange.com, bash-hackers.org,
+  for their great knowledge base and tutorials
+
+dict.cc, google.com (till v0.5) and deepl.com (since v0.6),
+  who make my english much more understandable
+
+Many more I have miss to note (sorry!), but not github.com for kindly hosting.
 Last but not least: Mom & Dad and archlinux.org
 
 
