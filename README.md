@@ -7,6 +7,8 @@ possible, and to start daily tasks with as less key strokes.
 
 Furthermore is there the possibility to customize his look by themes.
 
+Supports _Xorg_ as well as _Wayland_ sessions.
+
 ### Last version is 0.5, released Dez 2018
 
 #### Release Notes
