@@ -20,7 +20,9 @@ The full changelog [is there](https://github.com/loh-tar/tbsm/commits/master).
 
 ### Screenshots
 
-These shots are here to give you an idea what you will get.
+These shots are here to give you an idea what you will get. Don't worry, even if
+the pictures are a bit antique, they are still up to date, except for the version
+number you can read there.
 
 #### tbsm with tulizu
 
