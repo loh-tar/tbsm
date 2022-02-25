@@ -35,12 +35,6 @@
 # TODO
 #   Consider http://wiki.bash-hackers.org/howto/collapsing_functions
 
-# NOTE NEVER EVER CREATE A VARIABLE STARTING WITH 'own' !!!
-#      Since v0.6 we support custom session startup scripts. We like to give the
-#      user some 'name-space' where he is save not to accidentally overwrite
-#      some tbsm internal variable. 'my' may a better choice, but glaringly is that
-#      option already taken.
-
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
 declare -r myVersion="0.5" # Dez 2018
@@ -512,12 +506,16 @@ runXSession() {
   local -a searchPath=("${configDir}" "${sessionStartDirs[@]}")
   for path in ${searchPath[@]}; do
     local startFile="${path}/start-x"
-    if [[ -f "${startFile}" ]]; then
+    if [[ -x "${startFile}" ]]; then
       info "Start X by ${startFile}"
-      source "${startFile}"
+      "${startFile}" "${bin[@]}" "--" "${XserverArg[@]}"
       return
     fi
-    info "No ${startFile}"
+    if [[ -f "${startFile}" ]]; then
+      warn "Not executable ${startFile}"
+    else
+      info "No ${startFile}"
+    fi
   done
 
   # No special start file found, use the build in
