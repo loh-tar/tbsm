@@ -76,6 +76,11 @@ section 3- and 4- how to autostart and configure tbsm, by running:
 
     tbsm doc man
 
+### Independent Forks - Community Contributions
+
+  - Since we have decided in the past to [stop our i18n project](https://github.com/loh-tar/tbsm/issues/11)
+ had _oltulu_ created his own [turkish version](https://github.com/oltulu/tbsm) of _tbsm_. Cool!
+
 ### License
 
 GNU General Public License (GPL), Version 2.0
