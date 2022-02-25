@@ -43,11 +43,18 @@ That's how my login screen looks after a while with an issue file of
 
 ![riddler](riddler.png)
 
-### Install
+### Installation
 
 #### Packages
 
-Arch users find it in [AUR](https://aur.archlinux.org/packages/tbsm/)
+##### ArchLinux
+
+The official package by author can be found in [AUR](https://aur.archlinux.org/packages/tbsm/).
+
+##### openSUSE
+
+No official package, but [one or more](https://software.opensuse.org/package/tbsm?search_term=tbsm)
+provided by dedicated users.
 
 #### From Source
 
