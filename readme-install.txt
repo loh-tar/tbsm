@@ -1,13 +1,15 @@
 To install from source cd into the downloaded tree and simply run:
-  sudo make install
+  make
+
+Read what is offered and run the command of your choice with root-power.
 
 However, should you be on a non GNU system, or using a somehow special
 distribution which only has a BusyBox, please see there:
   https://github.com/loh-tar/tbsm/issues/9
 
-After that it may wise to run:
+After successful install it may wise to run:
   tbsm doc man    # Most notably chapter 3
   tbsm help
 
-To remove, which you will of cause never do, run:
-  sudo make uninstall
+And in case of an update:
+  tbsm doc notes
