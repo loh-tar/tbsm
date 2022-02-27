@@ -1,5 +1,23 @@
-This file should be called, actually, 'Release Notes'. The full changelog can
-you find here: https://github.com/loh-tar/tbsm/commits/master
+--------------------------------------------------------------------------------
+                         Release Note History of tbsm
+
+The full changelog is online: https://github.com/loh-tar/tbsm/commits/master
+--------------------------------------------------------------------------------
+
+
+2022-02-27  v0.6
+=======================================
+e7cc113 - Manual: Add Tips&Tricks section
+          Thanks to all who gave a hint
+afdb675 - Allow configuration of session search paths by conf file
+          Thanks to Douglas
+54b0c57 - Support XDG Base Directory Specification
+          Thanks to Vladimir
+0f04aa3 - Exit on error in config file. Prior was such an error ignored
+9f82e2d - Allow custom Xorg startup file
+        - Improved user information in verbose mode 53d339e 1a4d9f1
+031c2a3 - Makefile: Add new target 'update'
+        - Add new doc file ReleaseNotes, rename ChangeLog to ReleaseLog
 
 
 2018-12-12  v0.5
