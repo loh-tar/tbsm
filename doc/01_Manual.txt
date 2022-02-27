@@ -93,12 +93,14 @@ NOTE: Ensure you start no other display manager. Check your distribution's
 
 3-1- Customizing
 ------------------
-Take a look at /etc/xdg/tbsm/tbsm.conf and subfolders.
+Take a look at /etc/xdg/tbsm and subfolders.
 Create your own theme files in ~/.config/tbsm/themes.
 
 By default is tbsm a little chattering (--verbose) with the intend you become
 familiar with it. But quickly you will be annoyed and therefore have all themes
 a setting verboseLevel="2" (--info) which should be good for most cases.
+
+Run the command 'tbsm doc conf' to become an idea what else you can customize.
 
 
 3-2- Special Start X Configuration
