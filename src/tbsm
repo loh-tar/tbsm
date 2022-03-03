@@ -37,7 +37,7 @@
 
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
-declare -r myVersion="0.6" # Feb 2022
+declare -r myVersion="ssck" # Feb 2022
 declare -r myDescription="A pure bash session and application launcher"
 
 # Let's support XDG Base Directory Specification
