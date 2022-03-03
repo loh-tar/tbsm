@@ -116,7 +116,10 @@ executable. Here the simplest possible example:
 
   $ cat ~/.config/tbsm/start-x
   #!/bin/bash
-  # $@ contains: $1="${bin[@]}"  $2="--"  $3="${XserverArg[@]}"
+  # $@ contains: "${bin} -- ${XserverArg}" but all splitted, so $2 may "--"
+  # but not for sure. $3 is typically ":1" (display) $4 typically "-nolisten"
+  # and so on. Depending on your config settings.
+  #
   # do something before
   startx $@
   # do something after
@@ -186,7 +189,7 @@ redirect to /dev/null
   mkdir -p $(dirname $ownLogfile)
   # We also set an option to improve readability on high resolution displays in
   # a slightly strange way. Typical we would set XserverArg in the conf file
-  # Just remember: $@ is like "${bin[@]} -- ${XserverArg[@]}"
+  # Just remember: $@ is like "${bin} -- ${XserverArg}"
   startx $@ -dpi 120 2> ${ownLogfile}
 
 

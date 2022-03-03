@@ -1,0 +1,3 @@
+# Verify variable is used
+#   We have so much unused vars, like configured colors. So this check is pesky
+disable=SC2034
