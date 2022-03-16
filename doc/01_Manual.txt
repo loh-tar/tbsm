@@ -46,7 +46,7 @@ May you have a nice day, I run now 'q'
 2- Things Of Interest
 =======================
 He only works with .desktop files to start something, there is no other
-possibility.
+possibility. See 4-6- for a custom example.
 
 The following statements assume a usual configuration. However there will
 XDG_CONFIG_HOME and XDG_CONFIG_DIRS respected.
@@ -129,6 +129,7 @@ For a little more complex example see 4-5-
 Here are some hints collected in order as they was reported. Should that list
 grow in the future I should better enable the Wiki feature on GitHub.
 
+
 4-1- tbsm together with tmux
 ------------------------------
 When using tmux, tbsm will run with the above mentioned setup in each terminal
@@ -188,6 +189,20 @@ redirect to /dev/null
   # a slightly strange way. Typical we would set XserverArg in the conf file
   # Just remember: $@ is like "${bin[@]} -- ${XserverArg[@]}"
   startx $@ -dpi 120 2> ${ownLogfile}
+
+
+4-6- Add a shell session to the menu
+--------------------------------------
+In this example you will be dropped to a bash shell, other shells will have
+similar options. When your are done type 'exit' and you came back to tbsm.
+
+  $ cat ~/.config/tbsm/whitelist/bash-session.desktop
+  [Desktop Entry]
+  Name=Bash Session
+  Exec=bash -i
+  Terminal=true
+
+Asked by bee-keeper, https://github.com/loh-tar/tbsm/issues/18
 
 
 5- Contact
