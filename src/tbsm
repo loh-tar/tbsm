@@ -35,6 +35,9 @@
 # TODO
 #   Consider http://wiki.bash-hackers.org/howto/collapsing_functions
 
+# Ignore tbsm if in tmux
+[ ! -z $TMUX ] && continue
+
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
 declare -r myVersion="0.6" # Feb 2022
