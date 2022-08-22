@@ -35,8 +35,8 @@
 # TODO
 #   Consider http://wiki.bash-hackers.org/howto/collapsing_functions
 
-# Ignore tbsm if in tmux
-[ ! -z $TMUX ] && continue
+# Ignore tbsm if in tmux and not running interactively
+[ ! -z $TMUX ] && [ $- != *i* ] && return
 
 declare -r myName="tbsm"
 declare -r myLongName="Terminal Based Session Manager"
