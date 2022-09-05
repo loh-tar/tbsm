@@ -472,8 +472,9 @@ runSession() {
       ;;
     W) # Wayland Sessions
       if [[ $runInTTY ]]; then
-        [[ "${bin}" =~ (^| )(/.*/)?dbus-run-session( |$) ]] ||
-        waylandSessionArgs+=$(which dbus-run-session 2> /dev/null)
+        if [ -n "$DBUS_SESSION_ADDRESS" ]; then
+            waylandSessionArgs+=$(which dbus-run-session 2> /dev/null)
+        fi
         info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[*]} }${bin}"
         # shellcheck disable=SC2086 # Guess we could quote $bin but I can't test it
         XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin}
