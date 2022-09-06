@@ -468,7 +468,7 @@ runSession() {
       ;;
     W) # Wayland Sessions
       if [[ $runInTTY ]]; then
-        if [ -n "$DBUS_SESSION_ADDRESS" ]; then
+        if [ -z "$DBUS_SESSION_BUS_ADDRESS" ]; then
             waylandSessionArgs+=$(which dbus-run-session 2> /dev/null)
         fi
         info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[*]} }${bin}"
