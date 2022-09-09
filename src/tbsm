@@ -113,14 +113,14 @@ popCommand() {
   #   0 You have data
   #   1 No more data
 
-  local last=(${#cmdStack[@]}-1)
+  local last=${#cmdStack[@]}-1
 
   command=""
 
   [[ "${last}" -lt 0 ]] && return 1
 
   command="${cmdStack[${last}]}";
-  cmdStack=(${cmdStack[@]:0:last})
+  cmdStack=("${cmdStack[@]:0:last}")
 # # #   echo "pop  cmd: $command"
 }
 
@@ -132,7 +132,7 @@ popArgument() {
   # We could use popCommand here and test if there is "quit" but then we have to
   # to re-push it. That's why we code all again
 
-  local last=(${#cmdStack[@]}-1)
+  local last=${#cmdStack[@]}-1
 
   argument=""
 
@@ -140,7 +140,7 @@ popArgument() {
   [[ "${cmdStack[${last}]}" == "quit" ]] && return 1
 
   argument="${cmdStack[${last}]}";
-  cmdStack=(${cmdStack[@]:0:last})
+  cmdStack=("${cmdStack[@]:0:last}")
 # # #   echo "popedArg: $argument"
 }
 
@@ -167,7 +167,7 @@ popListIndex() {
 }
 
 # http://stackoverflow.com/a/229606
-hasOption() { [[ "${argList[@]}" == *"--$1"* ]]; }
+hasOption() { [[ "${argList[*]}" == *"--$1"* ]]; }
 
 # It's better not to use echo
 # http://unix.stackexchange.com/a/65819
@@ -200,8 +200,10 @@ exitCancel() { error "$*"; exit 2; }
 checkConfigDir() {
   [[ -d "${configDir}" ]] && return
 
-  mkdir -p "${configDir}"/{blacklist,themes,whitelist} 2>/dev/null
-  [[ $? != 0 ]] && exitError "Can't create my config dir: ${configDir}"
+  if ! mkdir -p "${configDir}"/{blacklist,themes,whitelist} 2>/dev/null ; then
+    exitError "Can't create my config dir: ${configDir}"
+  fi
+
   info "Created config directory: ${configDir}"
 }
 
@@ -214,7 +216,7 @@ readConfigFile() {
 
   # Hint: We can't print information about success/fail in this loop and respect
   # at the same time some verbose level. That why we collect data and print later
-  for path in ${searchPath[@]}; do
+  for path in "${searchPath[@]}" ; do
     local fullPath="${path}/${cfgFile}"
     if [[ ! -r "${fullPath}" ]]; then
       failPath=("${failPath[@]}" "${fullPath}")
@@ -225,7 +227,7 @@ readConfigFile() {
 
     # http://stackoverflow.com/a/20815951
     local -i lineNo=0
-    while IFS='= ' read lhs rhs
+    while IFS='= ' read -r lhs rhs
     do
       (( ++lineNo ))
       if [[ ! $lhs =~ ^\ *# && -n $lhs ]]; then
@@ -234,30 +236,30 @@ readConfigFile() {
 
         # Without eval does it not works as intended. Because we want use
         # already known variables in config files too.
-        declare -g $lhs="$(eval "echo $rhs")" || exitError "Bad config in file: ${fullPath} line: ${lineNo}"
+        declare -g "$lhs"="$(eval "echo $rhs")" || exitError "Bad config in file: ${fullPath} line: ${lineNo}"
       fi
     done < "${fullPath}"
 
   done
 
-  if (( !$ok )); then
+  if (( ! ok )); then
     error "No config file '${cfgFile##*/}' found"
     error "+-Searched in: ${failPath[0]%/*}/"
-    for path in ${failPath[@]:1}; do
+    for path in "${failPath[@]:1}" ; do
       error "+------------: ${path%/*}/"
     done
     return 1
   fi
 
   # Restore verbose level given on command line, if some
-  [[ -n "${protectedVerbose}" ]] && verboseLevel=("${protectedVerbose}")
+  [[ -n "${protectedVerbose}" ]] && verboseLevel="${protectedVerbose}"
 
   if [[ ${verboseLevel} -gt "2" ]] ; then
     info "Searched for config file(s) '${cfgFile##*/}' in ..."
-    for path in ${failPath[@]}; do
+    for path in "${failPath[@]}" ; do
       info "- Nothing in: ${path%/*}/"
     done
-    for path in ${usedPath[@]}; do
+    for path in "${usedPath[@]}" ; do
       info "+ Utilized  : ${path}"
     done
   fi
@@ -292,10 +294,9 @@ fillLists() {
   fillBlacklist
   clearLists "keepBlack"
 
-  for pfad in ${sessionPfads[@]}; do
+  for pfad in "${sessionPfads[@]}" ; do
     info "Look at session path: ${pfad}"
-    readDesktopFiles "$pfad" "$warnOnly"
-    [[ $? == 0 ]] && (( ++goodPfads ))
+    readDesktopFiles "$pfad" "$warnOnly" && (( ++goodPfads ))
   done
   if [[ $goodPfads -eq  "0" ]]; then
     warn "${FUNCNAME[0]}: No session paths found"
@@ -322,15 +323,16 @@ parseDesktopFiles() {
 
   for ((count=0; count < ${#desktopFiles[@]}; count++)); do
     # Filter blacklisted entries
-    realLink=("$(readlink -m ${desktopFiles[${count}]})")
+    realLink="$(readlink -m "${desktopFiles[${count}]}")"
     # http://stackoverflow.com/a/15394738
-    [[ "${blacklist[@]}" =~ "${realLink}" ]] && continue
+    # shellcheck disable=SC2076 # Guess we need the quotes to avoid false positive
+    [[ " ${blacklist[*]} " =~ " ${realLink} " ]] && continue
 
     # TryExec key is there to determine if executable is present,
     # but as we are going to test the Exec key anyway, we ignore it.
     # http://stackoverflow.com/a/22550813
-    execKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Exec=//p}' ${desktopFiles[${count}]})
-    nameKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Name=//p}' ${desktopFiles[${count}]})
+    execKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Exec=//p}' "${desktopFiles[${count}]}")
+    nameKey=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Name=//p}' "${desktopFiles[${count}]}")
     # Sadly have only the plasma.desktop file an entry with "Type=XSession", all
     # other (sorry, the few I have seen) says "Type=Application", so work around this
     flag="X"
@@ -339,26 +341,26 @@ parseDesktopFiles() {
     elif [[ $realLink == *"wayland-sessions"* ]]; then
       flag="W"    # Treat all in /usr/share/wayland-sessions as such
     else
-      val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Type=//p}' ${desktopFiles[${count}]})
+      val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Type=//p}' "${desktopFiles[${count}]}")
       if [[ "${val}" == "XSession" ]]; then
         flag="S"  # Takes action when there is a real local file, not a link
       else
-        val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Terminal=//p}' ${desktopFiles[${count}]})
+        val=$(sed -nr '/^\[Desktop Entry\]/,/^\[/{s/^Terminal=//p}' "${desktopFiles[${count}]}")
         [[ "${val}" == "true" ]] && flag="C"
       fi
     fi
     if [[ -n ${execKey} && -n ${nameKey} ]]; then
       # The .desktop files allow there Exec keys to use $PATH lookup.
-      binItem="$(which "${execKey%%[ ]*}" 2>/dev/null)"
+      if ! binItem="$(which "${execKey%%[ ]*}" 2>/dev/null)"
       # If which fails to return valid path, skip to next .desktop file.
-      if [[ $? != 0 ]]
         then
         warn "Skip '$nameKey' Binary found not: ${execKey%%[ ]*}"
         continue
       fi
-      binList+=("${binItem} ${execKey#*${execKey%%[ ]*}}")
+      binList+=("${binItem} ${execKey#*"${execKey%%[ ]*}"}")
       flagList+=("${flag}")
-      if [[ "$flag" == "W" ]] && [[ " ${nameList[@]} " =~ " ${nameKey} " ]]; then
+      # shellcheck disable=SC2076 # Guess we need the quotes to avoid false positive
+      if [[ "$flag" == "W" ]] && [[ " ${nameList[*]} " =~ " ${nameKey} " ]]; then
           nameList+=("${nameKey} (Wayland)")
       else
           nameList+=("${nameKey}")
@@ -377,7 +379,7 @@ readDesktopFiles() {
     # Given -maxdepth 1 to fix trouble at storing default/lastSession
     # links above blacklist/whitelist directorys
     # Why use -regex and not -name ?
-    desktopFiles=($(find "${filePfad}" -maxdepth 1 -regex .\*.desktop | sort))
+    mapfile -t desktopFiles < <(find "${filePfad}" -maxdepth 1 -regex .\*.desktop | sort)
     parseDesktopFiles
   else
     if [[ ${warnOnly} ]]; then
@@ -402,7 +404,7 @@ cmdSearch() {
   clearLists
 
   if [[ -d "${filePfad}" ]]; then
-    desktopFiles=($(grep -Ril --include="*.desktop" "$pattern" "$filePfad" | sort))
+    mapfile -t desktopFiles < <(grep -Ril --include="*.desktop" "$pattern" "$filePfad" | sort)
     info "Found matches: ${#desktopFiles[@]}"
     parseDesktopFiles
   else
@@ -420,12 +422,9 @@ printMenuSeparator() {
 }
 
 printMenuHeader() {
-  # When called without argument set title to menuTitle
-  local title=${@:-${menuTitle}}
-
   if [[ ! "${noMenuHeader}" ]]; then
     printMenuSeparator
-    print "${title}"
+    print "${menuTitle}"
     printMenuSeparator
   fi
 }
@@ -456,12 +455,12 @@ runSession() {
   # Run $bin according to its flag.
   case ${flagList[${listIndex}]} in
     C)  # Console programs
-      info "Run command: ${bin[@]}"
-      ${bin[@]}
+      info "Run command: ${bin}"
+      eval "${bin}"
       ;;
     S)  # X Sessions
       if [[ $runInTTY ]]; then
-        runXSession "${bin[@]}"
+        runXSession "${bin}"
       else
         info "Not running in tty. Will not start X session." "0"
         return 1
@@ -469,10 +468,11 @@ runSession() {
       ;;
     W) # Wayland Sessions
       if [[ $runInTTY ]]; then
-        [[ "${bin[@]}" =~ (^| )(/.*/)?dbus-run-session( |$) ]] ||
+        [[ "${bin}" =~ (^| )(/.*/)?dbus-run-session( |$) ]] ||
         waylandSessionArgs+=$(which dbus-run-session 2> /dev/null)
-        info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}"
-        XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin[@]}
+        info "Run command: XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[*]} }${bin}"
+        # shellcheck disable=SC2086 # Don't work when we quote $bin
+        XDG_SESSION_TYPE=wayland ${waylandSessionArgs:+${waylandSessionArgs[@]} }${bin}
       else
         info "Not running in tty. Will not start Wayland session." "0"
         return 1
@@ -480,10 +480,10 @@ runSession() {
       ;;
     X)  # Applications
       if [[ $runInTTY ]]; then
-        runXSession "${bin[@]}"
+        runXSession "${bin}"
       else
-        info "Not running in tty, run: ${bin[@]}"
-        ${bin[@]}
+        info "Not running in tty, run: ${bin}"
+        eval "${bin}"
       fi
       ;;
     -)  # Old cdm/tdm stuff, not used
@@ -496,7 +496,7 @@ runSession() {
 
   # Exit or not. Show full menu if no command left
   if popCommand
-    then pushCommand ${command}
+    then pushCommand "${command}"
     else pushCommand "menu"
   fi
 }
@@ -504,11 +504,11 @@ runSession() {
 runXSession() {
   # Has the user configured some custom start X file?
   local -a searchPath=("${configDir}" "${sessionStartDirs[@]}")
-  for path in ${searchPath[@]}; do
+  for path in "${searchPath[@]}"; do
     local startFile="${path}/start-x"
     if [[ -x "${startFile}" ]]; then
       info "Start X by ${startFile}"
-      "${startFile}" "${bin[@]}" "--" "${XserverArg[@]}"
+      eval "${startFile} ${bin} -- ${XserverArg}"
       return
     fi
     if [[ -f "${startFile}" ]]; then
@@ -519,8 +519,9 @@ runXSession() {
   done
 
   # No special start file found, use the build in
-  info "Run command: startx ${bin[@]} -- ${XserverArg[@]}"
-  startx ${bin[@]} -- ${XserverArg[@]}
+  info "Run command: startx ${bin} -- ${XserverArg}"
+  # shellcheck disable=SC2068,SC2086 # We need the splitting here, or(?)
+  startx ${bin} -- ${XserverArg}
 }
 
 showQuickMenu() {
@@ -533,8 +534,8 @@ showQuickMenu() {
 
   local promptText
   promptText="${promptCol}${quickPrompt}${txtNormal} [*]"
-  [[ -n "${defaultSession}" ]] && promptText=("${promptText}  [!]${nameList[0]}")
-  [[ -n "${lastSession}" && "${lastSession}" != "${defaultSession}" ]] && promptText=("${promptText} [ ]${nameList[1]}")
+  [[ -n "${defaultSession}" ]] && promptText="${promptText}  [!]${nameList[0]}"
+  [[ -n "${lastSession}" && "${lastSession}" != "${defaultSession}" ]] && promptText="${promptText} [ ]${nameList[1]}"
 
   promptText="${promptText} "
 
@@ -544,12 +545,13 @@ showQuickMenu() {
   elif [[ -z "${userInput}" ]]; then runSession "1"
   else
     # Don't quote here or it will not work as intended
+    # shellcheck disable=SC2086
     pushCommand ${userInput#!}
   fi
 }
 
 showMenu() {
-  printMenuHeader $1
+  printMenuHeader
   printMenuList
   printMenuFooter
 }
@@ -577,7 +579,7 @@ addToList() {
     ok=1
   done
 
-  if (( !$ok )) ; then
+  if (( ! ok )) ; then
     # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
     error "${FUNCNAME[1]:3} need a valid session number"
     return 1
@@ -603,8 +605,8 @@ removeFromList() {
       2) err=1; continue; ;; # Error but we ignore it
     esac
 
-    for file in ${configDir}/${list}/* ; do
-      link=("$(readlink -m ${file})")
+    for file in "${configDir}/${list}/"* ; do
+      link="$(readlink -m "${file}")"
       if [[ "${link}" == "${linkList[${listIndex}]}" ]] ; then
         unlink "$file"
         info "Session removed from ${list}: ${nameList[${listIndex}]}" "1"
@@ -614,7 +616,7 @@ removeFromList() {
 
   done
 
-  if (( !$ok || $err )) ; then
+  if (( ! ok ||  err )) ; then
     # FUNCNAME is a build in bash array. We cut leading 3 char "cmd"
     error "${FUNCNAME[1]:3} needs a valid session number"
     return 1
@@ -652,7 +654,7 @@ cmdDoc() {
   local docPath="/usr/share/doc/tbsm"
 
   popArgument
-  docMatch=($(find "${docPath}" -not -type d -iname \*${argument}\* | sort))
+  mapfile -t docMatch < <(find "${docPath}" -not -type d -iname \*"${argument}"\* | sort)
 
   if [[ ${#docMatch[@]} -gt 1 ]]; then
     print "Available documentation:"
@@ -660,10 +662,10 @@ cmdDoc() {
       doc="${doc#*/??_}"
       print "  ${doc%.*}"
     done
-  elif [[ -z "$docMatch" ]]; then
+  elif (( ${#docMatch[@]} == 0 )) ; then
       print "No manual match '${argument}'"
   else
-   less "$docMatch"
+   less "${docMatch[0]}"
   fi
 }
 
@@ -762,7 +764,7 @@ cmdLogout() {
   if [[ $runInTTY ]]; then
     # Logout is not easy from inside a script. Can you do it better?
     myPid=$$
-    kill -SIGHUP $(ps -ef | awk '($2=="'$myPid'"){print $3}')
+    kill -SIGHUP "$(ps -ef | awk '($2=="'$myPid'"){print $3}')"
   else
     exitNormal
   fi
@@ -837,8 +839,8 @@ prompt() {
     # the user may write down his command the input would discard.
     # That's why we wait for the first key stroke
     # FIXME: With -e is a new line printed after key stroke
-    read -s -n 1 -t 12 -p "${promptText} " userInput;
-    if [[ $? > 128 ]]; then
+    read -rs -n 1 -t 12 -p "${promptText} " userInput;
+    if [[ $? -gt 128 ]]; then
       print $'\r'"${menuHint} 1-${#nameList[@]} b d l m qm q r s w X ?"
     elif [[ -z "${userInput}" ]]; then
       pushCommand "quick-menu"
@@ -848,7 +850,7 @@ prompt() {
       userInput=""
       # Flush keyboard if e.q. cursor key was pressed
       # http://superuser.com/a/364421
-      read -t 0.01 -n 100
+      read -rt 0.01 -n 100
       printf $'\r'
       continue
     fi
@@ -857,7 +859,7 @@ prompt() {
     # http://stackoverflow.com/a/25000195
     read -erp "${promptText} " -i "$userInput" -a userInput ;
 
-    if [[ -z "${userInput}" ]]; then
+    if (( ${#userInput[@]} == 0 )) ; then
       pushCommand "quick-menu"
     elif [[ "${userInput[0]}" =~ ^[1-9]*[0-9]+$ ]]; then
       pushCommand "run" "${userInput[0]}"
@@ -898,6 +900,10 @@ if [[ -n "${theme}" ]]; then
   readConfigFile "themes/${theme}"
 fi
 
+# Urgs! Since afdb675 sessionPfads is no longer an array.
+# But to satisfy shellcheck elsewhere is that mandatory.
+read -ra sessionPfads <<< "$sessionPfads"
+
 # FIXME: Do you know a way to "re-eval" strings with variables in it so we can
 #        simple 'declare' all these on top of file but have effect if a config
 #        file change e.g. a color?
@@ -906,6 +912,7 @@ fi
 [[ -z "$tbsmColor" ]]     && tbsmColor="${txtBold}"
 [[ -z "$promptCol" ]]     && promptCol="${tbsmColor}"
 [[ -z "$menuTitle" ]]     && menuTitle="${tbsmColor}T${txtNormal}erminal ${tbsmColor}B${txtNormal}ased ${tbsmColor}S${txtNormal}ession ${tbsmColor}M${txtNormal}anager (${tbsmColor}${myName}${txtNormal} v${myVersion})"
+[[ -z "$colSeparator" ]]  && colSeparator="${txtClean}"
 [[ -z "$menuSeparator" ]] && menuSeparator="--------------------------------------------"
 [[ -z "$menuPrompt" ]]    && menuPrompt="${myName}:"
 [[ -z "$menuHint" ]]      && menuHint="${tbsmColor}Hint:${txtNormal}"
@@ -938,6 +945,7 @@ else
   IamToStupid="$*"
   IamToStupid="${IamToStupid%%--*}"
   # Don't quote here or it will not work as desired
+  # shellcheck disable=SC2068
   pushCommand ${IamToStupid[@]}
 fi
 
@@ -971,8 +979,8 @@ do
                     pushCommand "run" "$command"                ; ;;
 
     # Try to catch lazy written b w commands
-    [bw][1-9])      pushCommand ${command:0:1} ${command:1}     ; ;;
-   -[bw][1-9])      pushCommand ${command:0:2} ${command:2}     ; ;;
+    [bw][1-9])      pushCommand "${command:0:1}" "${command:1}" ; ;;
+   -[bw][1-9])      pushCommand "${command:0:2}" "${command:2}" ; ;;
 
     *)              error "Unknown command: ${command}"         ; ;;
   esac

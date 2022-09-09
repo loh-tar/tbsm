@@ -63,6 +63,7 @@ trouble in case of an update.
 #   tbsmColor="${txtBold}"
 #   promptCol="${tbsmColor}"
 #   menuTitle="${tbsmColor}T${txtNormal}erminal ${tbsmColor}B${txtNormal}ased ${tbsmColor}S${txtNormal}ession ${tbsmColor}M${txtNormal}anager (${tbsmColor}${myName}${txtNormal} v${myVersion})"
+#   colSeparator="${txtClean}"
 #   menuSeparator="--------------------------------------------"
 #   menuPrompt="${myName}:"
 #   menuHint="${tbsmColor}Hint:${txtNormal}"
