@@ -35,7 +35,7 @@ trouble in case of an update.
                       # @Xdisplay@ will replaced by number of tty
 #   verboseLevel="3"  # 0=quiet, 1=silent, 2=info, 3=verbose
 #   theme=""          # Ok, it is theme related
-#   sessionPfads="/usr/share/xsessions /usr/share/wayland-sessions"
+#   sessionPfads="/usr/share/xsessions:/usr/share/wayland-sessions"
                       # Yeah, looks like a typo, but use it as written :-)
 
 # Available text (foreground) colors and attributes, protected not to change.

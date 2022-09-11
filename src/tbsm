@@ -54,7 +54,7 @@ declare -r sessionStartDirs=( "${sessionStartDirs[@]}" )
 declare -r configDir="${XDG_CONFIG_HOME:-${HOME}/.config}/${myName}"
 
 declare -r installPfad=""
-declare    sessionPfads="/usr/share/xsessions /usr/share/wayland-sessions"
+declare    sessionPfads="/usr/share/xsessions:/usr/share/wayland-sessions"
 declare    runInTTY="yes"         # When unset we have no tty, glas is half full
 declare    XserverArg="@Xdisplay@ -nolisten tcp"  # @Xdisplay@ will replaced by number of tty
 declare    protectedVerbose
@@ -900,9 +900,8 @@ if [[ -n "${theme}" ]]; then
   readConfigFile "themes/${theme}"
 fi
 
-# Urgs! Since afdb675 sessionPfads is no longer an array.
-# But to satisfy shellcheck elsewhere is that mandatory.
-read -ra sessionPfads <<< "$sessionPfads"
+# Convert our path string into an array for nicer handling later
+IFS=':' read -ra sessionPfads <<< "$sessionPfads"
 
 # FIXME: Do you know a way to "re-eval" strings with variables in it so we can
 #        simple 'declare' all these on top of file but have effect if a config
