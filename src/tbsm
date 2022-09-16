@@ -643,7 +643,7 @@ cmdDefault() {
     return
   fi
 
-  ln -sf -T "${linkList[${listIndex}]}" "${configDir}/000-default-session.desktop"
+  ln -sf "${linkList[${listIndex}]}" "${configDir}/000-default-session.desktop"
   info "New default session: ${nameList[${listIndex}]}" "1"
   sleep 1
 }
@@ -792,7 +792,7 @@ cmdRun() {
   if [[ "${linkList[${listIndex}]}" != "-" ]]; then
     # Don't save default as last session
     if [[ "${defaultSession}" !=  "${linkList[${listIndex}]}" ]]; then
-      ln -sf -T "${linkList[${listIndex}]}" "${configDir}/001-last-session.desktop"
+      ln -sf "${linkList[${listIndex}]}" "${configDir}/001-last-session.desktop"
     fi
 
     if [[ -z "${defaultSession}" ]]; then
