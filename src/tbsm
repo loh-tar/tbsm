@@ -922,11 +922,11 @@ IFS=':' read -ra sessionPfads <<< "$sessionPfads"
 
 # Check if running in tty and set X displaynumber
 runInTTY=$(tty)
-if [[ ! "$runInTTY" =~ /dev/tty[0-9] ]]; then
+if [[ ! "$runInTTY" =~ /dev/tty[a-z]*([0-9]) ]]; then
   unset runInTTY
 else
   # Replace @Xdisplay@ with e.g. :1
-  XserverArg=${XserverArg/@Xdisplay@/:${runInTTY#/dev/tty}}
+  XserverArg=${XserverArg/@Xdisplay@/:${BASH_REMATCH[1]}}
 fi
 
 # Special handling to support GNU style help
