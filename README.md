@@ -9,20 +9,18 @@ Furthermore is there the possibility to customize his look by themes.
 
 Supports _Xorg_ as well as _Wayland_ sessions.
 
-### Last version is 0.6, Feb 2022
+### Last version is 0.7, Nov 2022
 
 #### Release Notes
 
-    031c2a3 - Makefile: Add new target 'update' !!!
-    e7cc113 - Manual: Add Tips&Tricks section
-              Thanks to all who gave a hint
-    afdb675 - Allow configuration of session search paths by conf file
-              Thanks to Douglas
-    54b0c57 - Support XDG Base Directory Specification
-              Thanks to Vladimir
-    0f04aa3 - Exit on error in config file. Prior was such an error ignored
-    53d339e - Improved user information in verbose mode - 1a4d9f1
-    a6e7bcb - Add new doc file ReleaseNotes, rename ChangeLog to ReleaseLog
+    c69bc18 - runSession: detect DBUS_SESSION_ADDRESS
+              Thanks to Victor for this DBUS/Wayland fix
+    4e8ad87 - Drop not needed option when using ln command
+    d6e8982 - Make check if running in tty more fuzzy ...
+              With these two we try to be more BSD compatible
+    56ec23b - Use colon as path separator in sessionPfads string
+              CAUTION! if you have used that in your config!
+    9c3a661 - Manual: Add a hint how to add a shell session to the menu
 
 Older release notes [are here](https://raw.githubusercontent.com/loh-tar/tbsm/master/doc/81_ReleaseLog.txt).
 
