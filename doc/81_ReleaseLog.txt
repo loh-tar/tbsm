@@ -5,6 +5,18 @@ The full changelog is online: https://github.com/loh-tar/tbsm/commits/master
 --------------------------------------------------------------------------------
 
 
+2022-11-13  v0.7
+=======================================
+c69bc18 - runSession: detect DBUS_SESSION_ADDRESS
+          Thanks to Victor for this DBUS/Wayland fix
+4e8ad87 - Drop not needed option when using ln command
+d6e8982 - Make check if running in tty more fuzzy ...
+          With these two we try to be more BSD compatible
+56ec23b - Use colon as path separator in sessionPfads string
+          CAUTION! if you have used that in your config!
+9c3a661 - Manual: Add a hint how to add a shell session to the menu
+
+
 2022-02-27  v0.6
 =======================================
 031c2a3 - Makefile: Add new target 'update'
